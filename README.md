@@ -1,6 +1,6 @@
 - - -
 
-# Unofficial test harness — not affiliated with the projects it tests
+# Test harness — not affiliated with the projects it tests
 
 - This repository exists only to test [nanocct](https://github.com/bernhard-42/nanocct) against third-party libraries.
 - The patches to build123d, ocpsvg, ocp_gordon, ocp_tessellate and ocp_viewer_core and the Python translations of Open CASCADE Technology's GTests are unofficial work of the nanocct project. They are not affiliated with, reviewed, endorsed or supported by the authors of those projects.
