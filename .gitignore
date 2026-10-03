@@ -1,0 +1,9 @@
+# downloaded or copied wheels (see Makefile)
+/wheels/
+# patched upstream checkouts
+/sources/
+# test environments
+/.venv/
+__pycache__/
+.pytest_cache/
+*.part
