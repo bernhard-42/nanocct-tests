@@ -1,6 +1,8 @@
+diff --git a/ocpsvg/hlr.py b/ocpsvg/hlr.py
+index 25a8445..d881609 100644
 --- a/ocpsvg/hlr.py
 +++ b/ocpsvg/hlr.py
-@@ -17,12 +17,13 @@
+@@ -17,12 +17,22 @@ from typing import (
  )
  from xml.etree import ElementTree as ET
  
@@ -10,19 +12,30 @@
 -from OCP.HLRAlgo import HLRAlgo_Projector
 -from OCP.HLRBRep import HLRBRep_Algo, HLRBRep_HLRToShape, HLRBRep_TypeOfResultingEdge
 -from OCP.TopoDS import TopoDS, TopoDS_Edge, TopoDS_Shape
-+from nanocct.Bnd import Bnd_Box
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_Transform
-+from nanocct.gp import gp_Ax2, gp_Dir, gp_Pnt, gp_Trsf, gp_Vec
-+from nanocct.HLRAlgo import HLRAlgo_Projector
-+from nanocct.HLRBRep import HLRBRep_Algo, HLRBRep_HLRToShape, HLRBRep_TypeOfResultingEdge
-+from nanocct.TopoDS import TopoDS_Edge, TopoDS_Shape
-+import nanocct.TopoDS as TopoDS
++from ._occt import (
++    Bnd_Box,
++    BRepBuilderAPI_Transform,
++    gp_Ax2,
++    gp_Dir,
++    gp_Pnt,
++    gp_Trsf,
++    gp_Vec,
++    HLRAlgo_Projector,
++    HLRBRep_Algo,
++    HLRBRep_HLRToShape,
++    HLRBRep_TypeOfResultingEdge,
++    TopoDS,
++    TopoDS_Edge,
++    TopoDS_Shape,
++)
  
  from .ocp import bounding_box, topoDS_iterator
  from .svg import edge_to_svg_path, float_formatter, format_svg_path
+diff --git a/ocpsvg/ocp.py b/ocpsvg/ocp.py
+index 69c2128..bffcd31 100644
 --- a/ocpsvg/ocp.py
 +++ b/ocpsvg/ocp.py
-@@ -3,25 +3,25 @@
+@@ -3,41 +3,38 @@ from itertools import chain
  from math import radians
  from typing import Iterable, Iterator, Optional, Union, cast
  
@@ -37,91 +50,75 @@
 -from OCP.BRepTools import BRepTools, BRepTools_WireExplorer
 -from OCP.Convert import Convert_ParameterisationType
 -from OCP.GC import (
-+from nanocct.Bnd import Bnd_Box
-+from nanocct.BRep import BRep_Tool
-+from nanocct.BRepAdaptor import BRepAdaptor_Curve
-+from nanocct.BRepBndLib import BRepBndLib
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace
-+from nanocct.BRepFeat import BRepFeat
-+from nanocct.BRepGProp import BRepGProp_Face
-+from nanocct.BRepLib import BRepLib_FindSurface
-+from nanocct.BRepTools import BRepTools, BRepTools_WireExplorer
-+from nanocct.Convert import Convert_ParameterisationType
-+from nanocct.GC import (
++from ._occt import (
++    Array1_gp_Pnt,
++    Bnd_Box,
++    BRep_Tool,
++    BRepAdaptor_Curve,
++    BRepBndLib,
++    BRepBuilderAPI_MakeEdge,
++    BRepBuilderAPI_MakeFace,
++    BRepFeat,
++    BRepGProp_Face,
++    BRepLib_FindSurface,
++    BRepTools,
++    BRepTools_WireExplorer,
++    Convert_ParameterisationType,
      GC_MakeArcOfCircle,
      GC_MakeArcOfEllipse,
      GC_MakeCircle,
      GC_MakeEllipse,
      GC_MakeSegment,
- )
+-)
 -from OCP.GCPnts import GCPnts_QuasiUniformDeflection
 -from OCP.Geom import (
-+from nanocct.GCPnts import GCPnts_QuasiUniformDeflection
-+from nanocct.Geom import (
++    GCPnts_QuasiUniformDeflection,
      Geom_BezierCurve,
      Geom_BSplineCurve,
      Geom_Circle,
-@@ -29,15 +29,15 @@
+     Geom_Curve,
      Geom_Ellipse,
      Geom_TrimmedCurve,
- )
+-)
 -from OCP.GeomAbs import GeomAbs_CurveType, GeomAbs_Shape
 -from OCP.GeomAdaptor import GeomAdaptor_Curve
 -from OCP.GeomConvert import (
-+from nanocct.GeomAbs import GeomAbs_CurveType, GeomAbs_Shape
-+from nanocct.GeomAdaptor import GeomAdaptor_Curve
-+from nanocct.GeomConvert import (
++    GeomAbs_CurveType,
++    GeomAbs_Shape,
++    GeomAdaptor_Curve,
      GeomConvert,
      GeomConvert_ApproxCurve,
      GeomConvert_BSplineCurveToBezierCurve,
- )
+-)
 -from OCP.collections import Array1_gp_Pnt
 -from OCP.gp import (
-+from nanocct.NCollection import NCollection_Array1
-+from nanocct.gp import (
      gp_Ax1,
      gp_Ax2,
      gp_Circ,
-@@ -47,13 +47,12 @@
+@@ -46,13 +43,11 @@ from OCP.gp import (
+     gp_Pnt,
      gp_Trsf,
      gp_Vec,
- )
+-)
 -from OCP.ShapeExtend import ShapeExtend_WireData
 -from OCP.ShapeFix import ShapeFix_Face
 -from OCP.Standard import Standard_Failure
 -from OCP.StdFail import StdFail_NotDone
 -from OCP.TopAbs import TopAbs_Orientation
 -from OCP.TopoDS import (
--    TopoDS,
-+from nanocct.ShapeExtend import ShapeExtend_WireData
-+from nanocct.ShapeFix import ShapeFix_Face
-+from nanocct.Standard import Standard_Failure
-+from nanocct.StdFail import StdFail_NotDone
-+from nanocct.TopAbs import TopAbs_Orientation
-+from nanocct.TopoDS import (
++    ShapeExtend_WireData,
++    ShapeFix_Face,
++    Standard_Failure,
++    StdFail_NotDone,
++    TopAbs_Orientation,
+     TopoDS,
      TopoDS_Builder,
      TopoDS_Compound,
-     TopoDS_Edge,
-@@ -62,6 +61,7 @@
-     TopoDS_Shape,
-     TopoDS_Wire,
- )
-+import nanocct.TopoDS as TopoDS
- 
- logger = logging.getLogger(__name__)
- 
-@@ -321,7 +321,7 @@
-             f"bezier curve must have between 2 and {BEZIER_MAX_DEGREE} control points"
-         )
- 
--    poles = Array1_gp_Pnt(1, n)
-+    poles = NCollection_Array1[gp_Pnt](1, n)
-     for i, control in enumerate(controls, 1):
-         poles.SetValue(i, control)
- 
+diff --git a/ocpsvg/svg.py b/ocpsvg/svg.py
+index acd6ffd..066ecd5 100755
 --- a/ocpsvg/svg.py
 +++ b/ocpsvg/svg.py
-@@ -20,14 +20,15 @@
+@@ -20,14 +20,26 @@ from typing import (
  )
  
  import svgelements
@@ -133,40 +130,71 @@
 -from OCP.gp import gp_Ax1, gp_Dir, gp_GTrsf, gp_Pnt, gp_Trsf, gp_Vec
 -from OCP.StdFail import StdFail_NotDone
 -from OCP.TopoDS import TopoDS, TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
-+from nanocct.BRepAdaptor import BRepAdaptor_Curve
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_GTransform, BRepBuilderAPI_Transform
-+from nanocct.Geom import Geom_BezierCurve
-+from nanocct.GeomAbs import GeomAbs_CurveType
-+from nanocct.GeomAdaptor import GeomAdaptor_Curve
-+from nanocct.gp import gp_Ax1, gp_Dir, gp_GTrsf, gp_Pnt, gp_Trsf, gp_Vec
-+from nanocct.StdFail import StdFail_NotDone
-+from nanocct.TopoDS import TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
-+import nanocct.TopoDS as TopoDS
++from ._occt import (
++    BRepAdaptor_Curve,
++    BRepBuilderAPI_GTransform,
++    BRepBuilderAPI_Transform,
++    Geom_BezierCurve,
++    GeomAbs_CurveType,
++    GeomAdaptor_Curve,
++    gp_Ax1,
++    gp_Dir,
++    gp_GTrsf,
++    gp_Pnt,
++    gp_Trsf,
++    gp_Vec,
++    StdFail_NotDone,
++    TopoDS,
++    TopoDS_Edge,
++    TopoDS_Face,
++    TopoDS_Shape,
++    TopoDS_Wire,
++)
  
  from .ocp import (
      CurveOrAdaptor,
+diff --git a/pyproject.toml b/pyproject.toml
+index 2aea769..ecd6e2c 100755
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -5,15 +5,13 @@
- version = "0.7.0"
- requires-python = ">=3.11"
- dependencies = [
--    "cadquery_ocp_proxy >= 8.0, < 9.0",
-+    "nanocct >= 8.0, < 8.1",
-     "svgelements >= 1.9.1, <2",
- ]
+@@ -11,7 +11,8 @@ dependencies = [
  
  
  [project.optional-dependencies]
- dev = [
--    "cadquery_ocp_novtk >= 8.0, < 9.0",
--    "cadquery-ocp-stubs >= 8.0, < 9.0",
+-dev = [
++# development and tests on one binding each: .[ocp] or .[nanocct]
++ocp = [
+     "cadquery_ocp_novtk >= 8.0, < 9.0",
+     "cadquery-ocp-stubs >= 8.0, < 9.0",
      "pytest",
-     "coverage",
+@@ -19,6 +20,13 @@ dev = [
      "mypy",
+     "ruff",
+ ]
++nanocct = [
++    "nanocct >= 8.0, < 9.0",
++    "pytest",
++    "coverage",
++    "mypy",
++    "ruff",
++]
+ 
+ [build-system]
+ requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+@@ -36,6 +44,8 @@ unfixable = []
+ 
+ [tool.ruff.lint.per-file-ignores]
+ "__init__.py" = ["F401"]
++# re-exports the OCCT names of the chosen binding
++"ocpsvg/_occt.py" = ["F401"]
+ 
+ [tool.coverage.report]
+ exclude_also = [
+diff --git a/tests/ocp.py b/tests/ocp.py
+index 39f6bcf..5632597 100644
 --- a/tests/ocp.py
 +++ b/tests/ocp.py
-@@ -1,14 +1,14 @@
+@@ -1,14 +1,21 @@
  from typing import Iterable
  
 -from OCP.Bnd import Bnd_Box
@@ -178,45 +206,51 @@
 -from OCP.gp import gp_Pnt, gp_Vec
 -from OCP.GProp import GProp_GProps
 -from OCP.TopoDS import TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
-+from nanocct.Bnd import Bnd_Box
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeWire
-+from nanocct.BRepCheck import BRepCheck_Analyzer
-+from nanocct.BRepGProp import BRepGProp, BRepGProp_Face
-+from nanocct.BRepTools import BRepTools
-+from nanocct.NCollection import NCollection_List
-+from nanocct.gp import gp_Pnt, gp_Vec
-+from nanocct.GProp import GProp_GProps
-+from nanocct.TopoDS import TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
++from ocpsvg._occt import (
++    Bnd_Box,
++    BRepBuilderAPI_MakeWire,
++    BRepCheck_Analyzer,
++    BRepGProp,
++    BRepGProp_Face,
++    BRepTools,
++    gp_Pnt,
++    gp_Vec,
++    GProp_GProps,
++    List_TopoDS_Shape,
++    TopoDS_Edge,
++    TopoDS_Face,
++    TopoDS_Shape,
++    TopoDS_Wire,
++)
  
  
  def face_area(face: TopoDS_Face):
-@@ -38,7 +38,7 @@
- def wire_via_BRepBuilderAPI(edges: Iterable[TopoDS_Edge]) -> TopoDS_Wire:
-     """Make a wire using `BRepBuilderAPI_MakeWire.Wire`"""
-     makewire = BRepBuilderAPI_MakeWire()
--    edge_list = List_TopoDS_Shape()
-+    edge_list = NCollection_List[TopoDS_Shape]()
-     for edge in edges:
-         edge_list.Append(edge)
-     makewire.Add(edge_list)
+diff --git a/tests/test_hlr.py b/tests/test_hlr.py
+index 5852fd8..29ab4a0 100644
 --- a/tests/test_hlr.py
 +++ b/tests/test_hlr.py
-@@ -4,9 +4,9 @@
+@@ -4,9 +4,13 @@ from math import radians
  from typing import Optional
  
  import pytest
 -from OCP.BRepPrimAPI import BRepPrimAPI_MakeCylinder
 -from OCP.gp import gp_Ax2, gp_Dir, gp_Pnt
 -from OCP.TopoDS import TopoDS_Shape
-+from nanocct.BRepPrimAPI import BRepPrimAPI_MakeCylinder
-+from nanocct.gp import gp_Ax2, gp_Dir, gp_Pnt
-+from nanocct.TopoDS import TopoDS_Shape
++from ocpsvg._occt import (
++    BRepPrimAPI_MakeCylinder,
++    gp_Ax2,
++    gp_Dir,
++    gp_Pnt,
++    TopoDS_Shape,
++)
  
  from ocpsvg.hlr import HiddenLineRenderer, Padding, basic_style, write_svg
  from ocpsvg.ocp import edge_from_curve, segment_curve
+diff --git a/tests/test_ocp.py b/tests/test_ocp.py
+index e4eee39..74cb196 100644
 --- a/tests/test_ocp.py
 +++ b/tests/test_ocp.py
-@@ -1,12 +1,12 @@
+@@ -1,12 +1,17 @@
  from typing import Iterable, Union
  
  import pytest
@@ -226,18 +260,25 @@
 -from OCP.gp import gp_Pnt, gp_Vec
 -from OCP.ShapeExtend import ShapeExtend_WireData
 -from OCP.TopoDS import TopoDS_Wire
-+from nanocct.BRepAdaptor import BRepAdaptor_Curve
-+from nanocct.Geom import Geom_BezierCurve, Geom_Curve, Geom_TrimmedCurve
-+from nanocct.GeomAdaptor import GeomAdaptor_Curve
-+from nanocct.gp import gp_Pnt, gp_Vec
-+from nanocct.ShapeExtend import ShapeExtend_WireData
-+from nanocct.TopoDS import TopoDS_Wire
++from ocpsvg._occt import (
++    BRepAdaptor_Curve,
++    Geom_BezierCurve,
++    Geom_Curve,
++    Geom_TrimmedCurve,
++    GeomAdaptor_Curve,
++    gp_Pnt,
++    gp_Vec,
++    ShapeExtend_WireData,
++    TopoDS_Wire,
++)
  from pytest import approx, raises
  
  from ocpsvg.ocp import (
+diff --git a/tests/test_svg.py b/tests/test_svg.py
+index 47e56f9..3113183 100755
 --- a/tests/test_svg.py
 +++ b/tests/test_svg.py
-@@ -9,12 +9,13 @@
+@@ -9,12 +9,25 @@ from typing import Any, Counter, Sequence, Union
  
  import pytest
  import svgelements
@@ -247,13 +288,213 @@
 -from OCP.GeomAbs import GeomAbs_CurveType
 -from OCP.gp import gp_Ax2, gp_Circ, gp_Pnt, gp_Trsf, gp_Vec
 -from OCP.TopoDS import TopoDS, TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_Transform
-+from nanocct.GC import GC_MakeArcOfCircle
-+from nanocct.Geom import Geom_Circle, Geom_Curve, Geom_Ellipse, Geom_TrimmedCurve
-+from nanocct.GeomAbs import GeomAbs_CurveType
-+from nanocct.gp import gp_Ax2, gp_Circ, gp_Pnt, gp_Trsf, gp_Vec
-+from nanocct.TopoDS import TopoDS_Edge, TopoDS_Face, TopoDS_Shape, TopoDS_Wire
-+import nanocct.TopoDS as TopoDS
++from ocpsvg._occt import (
++    BRepBuilderAPI_Transform,
++    GC_MakeArcOfCircle,
++    Geom_Circle,
++    Geom_Curve,
++    Geom_Ellipse,
++    Geom_TrimmedCurve,
++    GeomAbs_CurveType,
++    gp_Ax2,
++    gp_Circ,
++    gp_Pnt,
++    gp_Trsf,
++    gp_Vec,
++    TopoDS,
++    TopoDS_Edge,
++    TopoDS_Face,
++    TopoDS_Shape,
++    TopoDS_Wire,
++)
  from pytest import approx, raises
  
  from ocpsvg import (
+diff --git a/ocpsvg/_occt.py b/ocpsvg/_occt.py
+new file mode 100644
+index 0000000..8bf9805
+--- /dev/null
++++ b/ocpsvg/_occt.py
+@@ -0,0 +1,182 @@
++"""The OCCT binding ocpsvg runs on: OCP (cadquery-ocp) or nanocct.
++
++The binding is chosen once, at import: nanocct if it is installed, else OCP.
++Installing nanocct is a statement: where both are installed, ocpsvg and the
++other libraries of the OCP/nanocct ecosystem (ocp_gordon, ocp-tessellate) all
++use nanocct, so that a build123d built on nanocct and the libraries it imports
++share one binding. Who wants OCP does not install nanocct.
++
++Every module of ocpsvg imports its OCCT names from here, so the code is the
++same for both bindings; the type checker sees the OCP names.
++"""
++
++import importlib.util
++from typing import TYPE_CHECKING
++
++
++def _binding() -> str:
++    for binding in ("nanocct", "OCP"):
++        if importlib.util.find_spec(binding) is not None:
++            return binding
++    raise ImportError("ocpsvg needs nanocct or OCP (cadquery-ocp)")
++
++
++BINDING = _binding()
++
++if TYPE_CHECKING or BINDING == "OCP":
++    from OCP.Bnd import Bnd_Box
++    from OCP.BRep import BRep_Tool
++    from OCP.BRepAdaptor import BRepAdaptor_Curve
++    from OCP.BRepBndLib import BRepBndLib
++    from OCP.BRepBuilderAPI import (
++        BRepBuilderAPI_GTransform,
++        BRepBuilderAPI_MakeEdge,
++        BRepBuilderAPI_MakeFace,
++        BRepBuilderAPI_MakeWire,
++        BRepBuilderAPI_Transform,
++    )
++    from OCP.BRepCheck import BRepCheck_Analyzer
++    from OCP.BRepFeat import BRepFeat
++    from OCP.BRepGProp import BRepGProp, BRepGProp_Face
++    from OCP.BRepLib import BRepLib_FindSurface
++    from OCP.BRepPrimAPI import BRepPrimAPI_MakeCylinder
++    from OCP.BRepTools import BRepTools, BRepTools_WireExplorer
++    from OCP.Convert import Convert_ParameterisationType
++    from OCP.GC import (
++        GC_MakeArcOfCircle,
++        GC_MakeArcOfEllipse,
++        GC_MakeCircle,
++        GC_MakeEllipse,
++        GC_MakeSegment,
++    )
++    from OCP.GCPnts import GCPnts_QuasiUniformDeflection
++    from OCP.Geom import (
++        Geom_BSplineCurve,
++        Geom_BezierCurve,
++        Geom_Circle,
++        Geom_Curve,
++        Geom_Ellipse,
++        Geom_TrimmedCurve,
++    )
++    from OCP.GeomAbs import GeomAbs_CurveType, GeomAbs_Shape
++    from OCP.GeomAdaptor import GeomAdaptor_Curve
++    from OCP.GeomConvert import (
++        GeomConvert,
++        GeomConvert_ApproxCurve,
++        GeomConvert_BSplineCurveToBezierCurve,
++    )
++    from OCP.gp import (
++        gp_Ax1,
++        gp_Ax2,
++        gp_Circ,
++        gp_Dir,
++        gp_Elips,
++        gp_GTrsf,
++        gp_Pnt,
++        gp_Trsf,
++        gp_Vec,
++    )
++    from OCP.GProp import GProp_GProps
++    from OCP.HLRAlgo import HLRAlgo_Projector
++    from OCP.HLRBRep import (
++        HLRBRep_Algo,
++        HLRBRep_HLRToShape,
++        HLRBRep_TypeOfResultingEdge,
++    )
++    from OCP.ShapeExtend import ShapeExtend_WireData
++    from OCP.ShapeFix import ShapeFix_Face
++    from OCP.Standard import Standard_Failure
++    from OCP.StdFail import StdFail_NotDone
++    from OCP.TopAbs import TopAbs_Orientation
++    from OCP.TopoDS import (
++        TopoDS,
++        TopoDS_Builder,
++        TopoDS_Compound,
++        TopoDS_Edge,
++        TopoDS_Face,
++        TopoDS_Iterator,
++        TopoDS_Shape,
++        TopoDS_Wire,
++    )
++    from OCP.collections import Array1_gp_Pnt, List_TopoDS_Shape
++else:
++    from nanocct.Bnd import Bnd_Box
++    from nanocct.BRep import BRep_Tool
++    from nanocct.BRepAdaptor import BRepAdaptor_Curve
++    from nanocct.BRepBndLib import BRepBndLib
++    from nanocct.BRepBuilderAPI import (
++        BRepBuilderAPI_GTransform,
++        BRepBuilderAPI_MakeEdge,
++        BRepBuilderAPI_MakeFace,
++        BRepBuilderAPI_MakeWire,
++        BRepBuilderAPI_Transform,
++    )
++    from nanocct.BRepCheck import BRepCheck_Analyzer
++    from nanocct.BRepFeat import BRepFeat
++    from nanocct.BRepGProp import BRepGProp, BRepGProp_Face
++    from nanocct.BRepLib import BRepLib_FindSurface
++    from nanocct.BRepPrimAPI import BRepPrimAPI_MakeCylinder
++    from nanocct.BRepTools import BRepTools, BRepTools_WireExplorer
++    from nanocct.Convert import Convert_ParameterisationType
++    from nanocct.GC import (
++        GC_MakeArcOfCircle,
++        GC_MakeArcOfEllipse,
++        GC_MakeCircle,
++        GC_MakeEllipse,
++        GC_MakeSegment,
++    )
++    from nanocct.GCPnts import GCPnts_QuasiUniformDeflection
++    from nanocct.Geom import (
++        Geom_BSplineCurve,
++        Geom_BezierCurve,
++        Geom_Circle,
++        Geom_Curve,
++        Geom_Ellipse,
++        Geom_TrimmedCurve,
++    )
++    from nanocct.GeomAbs import GeomAbs_CurveType, GeomAbs_Shape
++    from nanocct.GeomAdaptor import GeomAdaptor_Curve
++    from nanocct.GeomConvert import (
++        GeomConvert,
++        GeomConvert_ApproxCurve,
++        GeomConvert_BSplineCurveToBezierCurve,
++    )
++    from nanocct.gp import (
++        gp_Ax1,
++        gp_Ax2,
++        gp_Circ,
++        gp_Dir,
++        gp_Elips,
++        gp_GTrsf,
++        gp_Pnt,
++        gp_Trsf,
++        gp_Vec,
++    )
++    from nanocct.GProp import GProp_GProps
++    from nanocct.HLRAlgo import HLRAlgo_Projector
++    from nanocct.HLRBRep import (
++        HLRBRep_Algo,
++        HLRBRep_HLRToShape,
++        HLRBRep_TypeOfResultingEdge,
++    )
++    from nanocct.ShapeExtend import ShapeExtend_WireData
++    from nanocct.ShapeFix import ShapeFix_Face
++    from nanocct.Standard import Standard_Failure
++    from nanocct.StdFail import StdFail_NotDone
++    from nanocct.TopAbs import TopAbs_Orientation
++    from nanocct.TopoDS import (
++        TopoDS_Builder,
++        TopoDS_Compound,
++        TopoDS_Edge,
++        TopoDS_Face,
++        TopoDS_Iterator,
++        TopoDS_Shape,
++        TopoDS_Wire,
++    )
++    # TopoDS::Edge() & co. are functions of the module nanocct.TopoDS, the
++    # collection templates are generic classes
++    import nanocct.TopoDS as TopoDS
++    from nanocct.NCollection import NCollection_Array1, NCollection_List
++
++    Array1_gp_Pnt = NCollection_Array1[gp_Pnt]
++    List_TopoDS_Shape = NCollection_List[TopoDS_Shape]

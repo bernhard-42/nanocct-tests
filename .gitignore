@@ -1,4 +1,4 @@
-# downloaded or copied wheels (see Makefile)
+# wheels copied in to test another build (see Makefile)
 /wheels/
 # patched upstream checkouts
 /sources/

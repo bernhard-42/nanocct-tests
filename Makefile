@@ -6,18 +6,18 @@
 #   make env               only (re)install the environment .venv
 #   make clean             remove sources/ and .venv/ (wheels/ is kept)
 #
-# One uv environment (.venv) runs all three suites: nanocct, build123d and the native ports of build123d's
+# One uv environment (.venv) runs all three suites: nanocct, build123d and the ports of build123d's
 # dependencies are resolved together, so every suite sees the same package versions. `make env` and `make tests`
 # recreate it; a single suite target uses the existing one.
 #
 # No OCP in the environment, not even the cadquery-ocp-novtk shim: importing OCP patches nanocct's classes in place,
 # which changes nanocct for every caller in the process (build123d imports ocpsvg and ocp_gordon). build123d's
-# dependencies that import OCP are therefore installed as native ports (PORTS), and `make env` fails if OCP is
-# importable afterwards.
+# dependencies that import OCP are therefore installed as ports (PORTS) or in their dual-binding versions
+# (DUAL), and `make env` fails if OCP is importable afterwards.
 #
-# The nanocct wheel comes from wheels/. When it holds no wheel, the latest GitHub release's wheel for this platform is
-# downloaded there first. To test another build, copy its wheel into wheels/: the highest nanocct version this Python
-# accepts wins (scripts/wheels.py); a wheel replaced under the same name is picked up too.
+# nanocct comes from PyPI (its latest release), unless wheels/ holds a wheel: to test another build, copy its wheel into
+# wheels/, and the highest nanocct version there that this Python accepts is installed instead (scripts/wheels.py); a
+# wheel replaced under the same name is picked up too. Empty wheels/ to go back to PyPI.
 
 SHELL := bash
 .SHELLFLAGS := -euo pipefail -c
@@ -29,18 +29,22 @@ PYTHON ?= 3.14
 BUILD123D_REPO   := https://github.com/gumyr/build123d.git
 BUILD123D_COMMIT := 2aec5679ae2c33b663ff452bc8930d0ece564a96
 
-# Native nanocct ports of the packages that import OCP -- build123d's dependencies and the viewer's core (ocp_tessellate,
-# ocp_viewer_core: `uv pip install ocp_vscode` then needs nothing else): name-version|sha256|url of the PyPI sdist (PyPI's
-# own digest, https://pypi.org/pypi/<name>/<version>/json), patched with patches/<name-version>.patch
+# Ports of build123d's dependencies that import OCP, patched to run on OCP or nanocct (nanocct wherever it is
+# installed): name-version|sha256|url of the PyPI sdist (PyPI's own digest,
+# https://pypi.org/pypi/<name>/<version>/json), patched with patches/<name-version>.patch
 PORTS := \
     ocpsvg-0.7.0|e8a03495e873943398df61e1cd02bd0d6f0f206665a2c9f86430b75bd2ecc152|https://files.pythonhosted.org/packages/77/93/6731a317aca67604914e69f4d92d544c5637c89d8fd54e5dde9ddbc93561/ocpsvg-0.7.0.tar.gz \
-    ocp_gordon-0.3.1|e55e695fd421e4dc10fe91636e7f2fa376ad81572faaf74e7bbed4b78c7918b7|https://files.pythonhosted.org/packages/35/b2/66ed6601660648ad5bf84a571460cd57e9db4b28c6833c55e229211a418d/ocp_gordon-0.3.1.tar.gz \
-    bd_materials-0.2.4|daea82953c18cef04be9f8519c75518d230df1b78457f4a92a7da8725e533bb8|https://files.pythonhosted.org/packages/19/28/940946d9cc9f1489c3d3f0c6a8f2acaf2a1240ba1cf24df69ac385f9c0d7/bd_materials-0.2.4.tar.gz \
-    ocp_tessellate-3.5.3|3f627da7099cd078081432b26db179b7f225241d1ca9474ce959e714f6cac564|https://files.pythonhosted.org/packages/ef/59/f5affe69a54587413b03b22020b0353fba1b4aeb3a281912eb6eaeef9347/ocp_tessellate-3.5.3.tar.gz \
-    ocp_viewer_core-1.0.13|57ccbfff31a03fdd6c78e1dc5f05ff55d49f959df956d450f211ec7b06bf91ca|https://files.pythonhosted.org/packages/d2/99/6c36e0fda14e44e66e2fccc04420be7650f813f9e6556cb27e5470171bb8/ocp_viewer_core-1.0.13.tar.gz
+    ocp_gordon-0.3.1|e55e695fd421e4dc10fe91636e7f2fa376ad81572faaf74e7bbed4b78c7918b7|https://files.pythonhosted.org/packages/35/b2/66ed6601660648ad5bf84a571460cd57e9db4b28c6833c55e229211a418d/ocp_gordon-0.3.1.tar.gz
 PORT_NAMES := $(foreach p,$(PORTS),$(firstword $(subst |, ,$(p))))
-# what `make env` installs of them: ocp_viewer_core with its [cli] extra, which ocp_vscode asks for
-PORT_INSTALL := $(foreach n,$(PORT_NAMES),"sources/ports/$(n)$(if $(filter ocp_viewer_core-%,$(n)),[cli])")
+PORT_INSTALL := $(foreach n,$(PORT_NAMES),"sources/ports/$(n)")
+
+# The packages that run on OCP or nanocct, whichever is installed -- bd_materials and the viewer's core (ocp_tessellate,
+# ocp_viewer_core with its [cli] extra: ocp_vscode then needs nothing else). Not released yet, so they are installed
+# from local checkouts in DUAL_DIR, rebuilt on every `make env` (--reinstall-package), so an edit there is picked up.
+DUAL_DIR ?= $(HOME)/Development/CAD
+DUAL := ocp-tessellate ocp-viewer-core bd_materials
+DUAL_INSTALL := "$(DUAL_DIR)/ocp-tessellate" "$(DUAL_DIR)/ocp-viewer-core[cli]" "$(DUAL_DIR)/bd_materials" \
+    $(foreach d,$(DUAL),--reinstall-package $(d))
 
 ifeq ($(OS),Windows_NT)
 VENV_PY := $(CURDIR)/.venv/Scripts/python.exe
@@ -84,13 +88,16 @@ sources/ports/.patched: $(PORT_NAMES:%=patches/%.patch)
 
 # vtk: build123d's VTK tests (test_jupyter.py, test_vtk_poly_data.py) skip themselves without it.
 # Recreated (--clear), so nothing of an earlier install survives. packaging first: scripts/wheels.py reads the wheel
-# tags this interpreter accepts (its stdout is only the wheel path).
+# tags this interpreter accepts (its stdout is only the wheel path, or "nanocct" for PyPI).
 env: sources/build123d/.patched sources/ports/.patched
+	for d in $(DUAL); do \
+	    if [ ! -f "$(DUAL_DIR)/$$d/pyproject.toml" ]; then echo "env: no checkout of $$d in $(DUAL_DIR) (DUAL_DIR=...)" >&2; exit 1; fi; \
+	done
 	uv venv --quiet --clear --python $(PYTHON) .venv
 	uv pip install --quiet --python $(VENV_PY) packaging
 	nanocct=$$($(VENV_PY) scripts/wheels.py); \
-	echo "env: $$(basename "$$nanocct")"; \
-	uv pip install --python $(VENV_PY) "$$nanocct" $(PORT_INSTALL) \
+	if [ "$$nanocct" = "nanocct" ]; then echo "env: nanocct from PyPI"; else echo "env: $$(basename "$$nanocct")"; fi; \
+	uv pip install --python $(VENV_PY) "$$nanocct" $(PORT_INSTALL) $(DUAL_INSTALL) \
 	    -e "sources/build123d[development]" vtk pytest
 	$(VENV_PY) -c "import nanocct.all"
 	$(VENV_PY) -c 'import importlib.util, sys; sys.exit("OCP is importable in .venv" if importlib.util.find_spec("OCP") is not None else 0)'
