@@ -27,6 +27,8 @@ SHELL := bash
 PYTHON ?= 3.14
 
 BUILD123D_REPO   := https://github.com/gumyr/build123d.git
+# patches/build123d-nanocct.patch writes this commit's version, marked +nanocct, into src/build123d/_version.py
+# (0.13.1.dev132+nanocct): a new commit needs it updated there
 BUILD123D_COMMIT := 2aec5679ae2c33b663ff452bc8930d0ece564a96
 
 # Ports of build123d's dependencies that import OCP, patched to run on OCP or nanocct (nanocct wherever it is

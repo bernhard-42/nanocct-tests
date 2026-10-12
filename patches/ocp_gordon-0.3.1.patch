@@ -49,9 +49,22 @@ index d603b97..e103e33 100644
  # Import our Gordon interpolation module
  import sys
 diff --git a/pyproject.toml b/pyproject.toml
-index 2b0bd68..01f1ffe 100644
+index 2b0bd68..01c8600 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
+@@ -1,10 +1,10 @@
+ [build-system]
+-requires = ["setuptools>=61.0", "wheel", "setuptools_scm"]
++requires = ["setuptools>=61.0", "wheel"]
+ build-backend = "setuptools.build_meta"
+ 
+ [project]
+ name = "ocp_gordon"
+-dynamic = ["version"]
++version = "0.3.1+nanocct"
+ authors = [
+   { name="Fan Gong", email="gongfan99@hotmail.com" },
+ ]
 @@ -18,7 +18,6 @@ classifiers = [
      "Topic :: Software Development :: Libraries :: Python Modules",
  ]
@@ -82,6 +95,13 @@ index 2b0bd68..01f1ffe 100644
  ]
  
  [tool.setuptools.packages.find]
+@@ -57,6 +57,3 @@ where = ["src_py"]
+ [tool.setuptools.package-data]
+ ocp_gordon = ["py.typed"]
+ 
+-[tool.setuptools_scm]
+-version_scheme = "guess-next-dev"
+-local_scheme = "no-local-version"
 diff --git a/src_py/ocp_gordon/internal/approx_result.py b/src_py/ocp_gordon/internal/approx_result.py
 index 4269892..095977a 100644
 --- a/src_py/ocp_gordon/internal/approx_result.py

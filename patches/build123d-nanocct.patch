@@ -1,8 +1,16 @@
 diff --git a/pyproject.toml b/pyproject.toml
-index 3859e6b6..dff97e10 100644
+index 3859e6b6..fccebb4b 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -33,7 +33,7 @@ classifiers = [
+@@ -2,7 +2,6 @@
+ requires = [
+     "setuptools>=45",
+     "wheel",
+-    "setuptools_scm[toml]>=6.2",
+ ]
+ build-backend = "setuptools.build_meta"
+ 
+@@ -33,7 +32,7 @@ classifiers = [
  ]
  
  dependencies = [
@@ -11,7 +19,7 @@ index 3859e6b6..dff97e10 100644
      "typing_extensions >= 4.16.0, < 5",
      "numpy >= 2, < 3",
      "svgpathtools >= 1.5.1, < 2",
-@@ -85,10 +85,8 @@ development = [
+@@ -85,10 +84,8 @@ development = [
      "wheel",
  ]
  
@@ -24,6 +32,25 @@ index 3859e6b6..dff97e10 100644
  
  # dependencies to build the docs
  docs = [
+@@ -114,8 +111,9 @@ where = ["src"]
+ # exclude build123d._dev from wheels
+ exclude = ["build123d._dev"]
+ 
+-[tool.setuptools_scm]
+-write_to = "src/build123d/_version.py"
++# the nanocct port: build123d at 2aec567 (setuptools_scm: 0.13.1.dev132), marked +nanocct
++[tool.setuptools.dynamic]
++version = { attr = "build123d._version.version" }
+ 
+ [tool.black]
+ target-version = ["py311", "py312", "py313", "py314"]
+diff --git a/src/build123d/_version.py b/src/build123d/_version.py
+new file mode 100644
+index 00000000..c275cc9e
+--- /dev/null
++++ b/src/build123d/_version.py
+@@ -0,0 +1 @@
++version = __version__ = "0.13.1.dev132+nanocct"
 diff --git a/src/build123d/build_common.py b/src/build123d/build_common.py
 index 2fc44e1a..f39b6801 100644
 --- a/src/build123d/build_common.py
