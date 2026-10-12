@@ -75,7 +75,7 @@ bd_materials and the viewer's core run on `OCP` or nanocct (nanocct wherever it 
 
 ## Upstream sources
 
-Everything upstream lands in `sources/` (git-ignored). build123d is cloned once and checked out at the pinned commits (`BUILD123D_COMMIT` in the `Makefile`); the ports' sdists are downloaded once into `sources/sdist`. When a patch changes, the sources are reset to their original state and the patches are applied again. `make clean` removes `sources/` and `.venv/`.
+Everything upstream lands in `sources/` (git-ignored). build123d is cloned once and checked out at the pinned commits (`BUILD123D_COMMIT` in the `Makefile`); the ports' sdists are downloaded once into `sources/sdist`. When a patch changes, the sources are reset to their original state and the patches are applied again. `make clean` removes everything untracked that `.gitignore` marks as generated: `sources/`, `.venv/`, `wheels/` and the caches.
 
 ## License
 

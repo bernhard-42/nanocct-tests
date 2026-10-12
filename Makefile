@@ -4,7 +4,7 @@
 #   make occt-tests        tests/ (OCCT's GTests in Python, one directory per toolkit)
 #   make tests             all three, one after the other
 #   make env               only (re)install the environment .venv
-#   make clean             remove sources/ and .venv/ (wheels/ is kept)
+#   make clean             remove what .gitignore marks as generated: .venv/, sources/, wheels/, caches
 #
 # One uv environment (.venv) runs all three suites: nanocct, build123d and the ports of build123d's
 # dependencies are resolved together, so every suite sees the same package versions. `make env` and `make tests`
@@ -114,5 +114,8 @@ build123d-tests:
 occt-tests: 
 	$(VENV_PY) -m pytest tests
 
+# Everything untracked that the tracked .gitignore marks as generated, nested clones in sources/ included. Not what
+# .git/info/exclude or a global ignore file hides (work in progress kept out of the repository): `git clean -X`
+# would remove those too.
 clean:
-	rm -rf sources .venv
+	cd "$(CURDIR)" && git ls-files -z --others --ignored --exclude-from=.gitignore --directory | xargs -0 rm -rf
