@@ -74,10 +74,11 @@ tests: env build123d-tests occt-tests
 sources/build123d/.patched: patches/build123d-nanocct.patch
 	$(call checkout,sources/build123d,$(BUILD123D_REPO),$(BUILD123D_COMMIT),patches/build123d-nanocct.patch)
 
-# Each sdist is downloaded once into sources/sdist and verified; the tree in sources/ports is unpacked and patched anew
-sources/ports/.patched: $(PORT_NAMES:%=patches/%.patch)
+# $(1) ports (name-version|sha256|url): each sdist is downloaded once into sources/sdist and verified; its tree in
+# sources/ports is unpacked and patched anew with patches/<name-version>.patch.
+define ports
 	mkdir -p sources/sdist sources/ports
-	for entry in $(foreach p,$(PORTS),'$(p)'); do \
+	for entry in $(foreach p,$(1),'$(p)'); do \
 	    IFS='|' read -r pkg sha url <<< "$$entry"; \
 	    tarball="sources/sdist/$$pkg.tar.gz"; \
 	    if [ ! -f "$$tarball" ]; then curl -fsSL -o "$$tarball.part" "$$url" && mv "$$tarball.part" "$$tarball"; fi; \
@@ -86,6 +87,10 @@ sources/ports/.patched: $(PORT_NAMES:%=patches/%.patch)
 	    tar -xzf "$$tarball" -C sources/ports; \
 	    patch -p1 --forward --quiet -d "sources/ports/$$pkg" < "patches/$$pkg.patch"; \
 	done
+endef
+
+sources/ports/.patched: $(PORT_NAMES:%=patches/%.patch)
+	$(call ports,$(PORTS))
 	touch $@
 
 # vtk: build123d's VTK tests (test_jupyter.py, test_vtk_poly_data.py) skip themselves without it.
