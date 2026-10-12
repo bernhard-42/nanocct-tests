@@ -1,16 +1,8 @@
 diff --git a/pyproject.toml b/pyproject.toml
-index 3859e6b6..fccebb4b 100644
+index 3859e6b6..16c5b2cd 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
-@@ -2,7 +2,6 @@
- requires = [
-     "setuptools>=45",
-     "wheel",
--    "setuptools_scm[toml]>=6.2",
- ]
- build-backend = "setuptools.build_meta"
- 
-@@ -33,7 +32,7 @@ classifiers = [
+@@ -33,7 +33,7 @@ classifiers = [
  ]
  
  dependencies = [
@@ -19,7 +11,7 @@ index 3859e6b6..fccebb4b 100644
      "typing_extensions >= 4.16.0, < 5",
      "numpy >= 2, < 3",
      "svgpathtools >= 1.5.1, < 2",
-@@ -85,10 +84,8 @@ development = [
+@@ -85,10 +85,8 @@ development = [
      "wheel",
  ]
  
@@ -32,7 +24,7 @@ index 3859e6b6..fccebb4b 100644
  
  # dependencies to build the docs
  docs = [
-@@ -114,8 +111,9 @@ where = ["src"]
+@@ -114,8 +112,9 @@ where = ["src"]
  # exclude build123d._dev from wheels
  exclude = ["build123d._dev"]
  
