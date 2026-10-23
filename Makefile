@@ -13,7 +13,7 @@
 # No OCP in the environment, not even the cadquery-ocp-novtk shim: importing OCP patches nanocct's classes in place,
 # which changes nanocct for every caller in the process (build123d imports ocpsvg and ocp_gordon). build123d's
 # dependencies that import OCP are therefore installed as ports (PORTS) or in their dual-binding versions
-# (DUAL), and `make env` fails if OCP is importable afterwards.
+# (DUAL, DUAL_PYPI), and `make env` fails if OCP is importable afterwards.
 #
 # nanocct comes from PyPI (its latest release), unless wheels/ holds a wheel: to test another build, copy its wheel into
 # wheels/, and the highest nanocct version there that this Python accepts is installed instead (scripts/wheels.py); a
@@ -40,13 +40,15 @@ PORTS := \
 PORT_NAMES := $(foreach p,$(PORTS),$(firstword $(subst |, ,$(p))))
 PORT_INSTALL := $(foreach n,$(PORT_NAMES),"sources/ports/$(n)")
 
-# The packages that run on OCP or nanocct, whichever is installed -- bd_materials and the viewer's core (ocp_tessellate,
-# ocp_viewer_core with its [cli] extra: ocp_vscode then needs nothing else). Not released yet, so they are installed
-# from local checkouts in DUAL_DIR, rebuilt on every `make env` (--reinstall-package), so an edit there is picked up.
+# The packages that run on OCP or nanocct, whichever is installed. bd_materials does so since its release 0.2.5, which
+# comes from PyPI (DUAL_PYPI). The viewer's core (ocp_tessellate, ocp_viewer_core with its [cli] extra: ocp_vscode then
+# needs nothing else) is not released yet, so it is installed from local checkouts in DUAL_DIR, rebuilt on every
+# `make env` (--reinstall-package), so an edit there is picked up.
 DUAL_DIR ?= $(HOME)/Development/CAD
-DUAL := ocp-tessellate ocp-viewer-core bd_materials
-DUAL_INSTALL := "$(DUAL_DIR)/ocp-tessellate" "$(DUAL_DIR)/ocp-viewer-core[cli]" "$(DUAL_DIR)/bd_materials" \
+DUAL := ocp-tessellate ocp-viewer-core
+DUAL_INSTALL := "$(DUAL_DIR)/ocp-tessellate" "$(DUAL_DIR)/ocp-viewer-core[cli]" \
     $(foreach d,$(DUAL),--reinstall-package $(d))
+DUAL_PYPI := "bd_materials>=0.2.5"
 
 ifeq ($(OS),Windows_NT)
 VENV_PY := $(CURDIR)/.venv/Scripts/python.exe
@@ -104,7 +106,7 @@ env: sources/build123d/.patched sources/ports/.patched
 	uv pip install --quiet --python $(VENV_PY) packaging
 	nanocct=$$($(VENV_PY) scripts/wheels.py); \
 	if [ "$$nanocct" = "nanocct" ]; then echo "env: nanocct from PyPI"; else echo "env: $$(basename "$$nanocct")"; fi; \
-	uv pip install --python $(VENV_PY) "$$nanocct" $(PORT_INSTALL) $(DUAL_INSTALL) \
+	uv pip install --python $(VENV_PY) "$$nanocct" $(PORT_INSTALL) $(DUAL_INSTALL) $(DUAL_PYPI) \
 	    -e "sources/build123d[development]" vtk pytest
 	$(VENV_PY) -c "import nanocct.all"
 	$(VENV_PY) -c 'import importlib.util, sys; sys.exit("OCP is importable in .venv" if importlib.util.find_spec("OCP") is not None else 0)'

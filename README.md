@@ -59,11 +59,10 @@ There is no `OCP` in the environment, not even the `cadquery-ocp-novtk` compatib
 - `ocpsvg` 0.7.0 (`patches/ocpsvg-0.7.0.patch`)
 - `ocp_gordon` 0.3.1 (`patches/ocp_gordon-0.3.1.patch`)
 
-bd_materials and the viewer's core run on `OCP` or nanocct (nanocct wherever it is installed). Their dual-binding versions are not released yet, so they are installed unchanged from local checkouts in `DUAL_DIR` (default `~/Development/CAD`, `make DUAL_DIR=... env` for another one) and rebuilt on every `make env`:
+bd_materials and the viewer's core run on `OCP` or nanocct (nanocct wherever it is installed). bd_materials does so since its release 0.2.5, which is installed from PyPI. The viewer's core is not released in its dual-binding version yet, so it is installed unchanged from local checkouts in `DUAL_DIR` (default `~/Development/CAD`, `make DUAL_DIR=... env` for another one) and rebuilt on every `make env`:
 
 - `ocp-tessellate`
 - `ocp-viewer-core`, with its `cli` extra
-- `bd_materials`
 
 `make env` fails if `OCP` is importable afterwards. The environment also holds `vtk` from PyPI, for build123d's two VTK test modules (`test_jupyter.py`, `test_vtk_poly_data.py`), which skip themselves without it. 
 
