@@ -7,6 +7,7 @@ from nanocct.Geom import Geom_BSplineCurve
 from nanocct.GeomAbs import GeomAbs_CN, GeomAbs_PiecewiseBezier
 from nanocct.gp import gp_Pnt, gp_Trsf, gp_Vec
 from nanocct.NCollection import NCollection_Array1
+from nanocct.Precision import Precision
 
 
 def _pnts(*pts):
@@ -389,3 +390,22 @@ def test_Geom_BSplineCurve_Test_WeightsArray_Rational_ReturnsOwning():
     assert w[2] == pytest.approx(2.0)
     assert w[3] == pytest.approx(3.0)
     assert w[4] == pytest.approx(1.0)
+
+
+def test_Geom_BSplineCurveTest_IsG1TranslatedPeriodicIntervalsAndSeam():
+    poles = NCollection_Array1[gp_Pnt](4)
+    for i, p in enumerate(((0, 0, 0), (4, 0, 0), (4, 4, 0), (0, 4, 0))):
+        poles[i] = gp_Pnt(*p)
+    knots = NCollection_Array1[float](5)
+    mults = NCollection_Array1[int](5)
+    mults.Init(1)
+    for i in range(5):
+        knots[i] = float(i)
+    curve = Geom_BSplineCurve(poles, knots, mults, 1, True)
+    ang = Precision.Angular_s()
+    for shift in (-8.0, 0.0, 4.0, 12.0):
+        assert curve.IsG1(shift + 0.25, shift + 0.75, ang) is True
+        assert curve.IsG1(shift + 0.25, shift + 1.75, ang) is False
+        assert curve.IsG1(shift + 3.75, shift + 4.25, ang) is False
+        assert curve.IsG1(shift, shift, ang) is False
+        assert curve.IsG1(shift + 0.25, shift + 8.25, ang) is False

@@ -3,7 +3,7 @@ import pytest
 
 from nanocct import TopoDS
 from nanocct.BRep import BRep_Tool
-from nanocct.gp import gp_XYZ
+from nanocct.gp import gp_Vec, gp_XYZ
 from nanocct.NCollection import NCollection_DataMap, NCollection_HArray1, NCollection_HArray2
 from nanocct.Standard import Standard_Transient
 from nanocct.StepData import StepData_Factors
@@ -11,6 +11,7 @@ from nanocct.StepShape import StepShape_TopologicalRepresentationItem
 from nanocct.StepToTopoDS import StepToTopoDS_NMTool, StepToTopoDS_Tool, StepToTopoDS_TranslateFace
 from nanocct.StepVisual import (
     StepVisual_ComplexTriangulatedFace,
+    StepVisual_ComplexTriangulatedSurfaceSet,
     StepVisual_CoordinatesList,
     StepVisual_FaceOrSurface,
     StepVisual_TriangulatedFace,
@@ -276,3 +277,192 @@ def test_StepToTopoDS_TranslateFaceTest_ComplexTriangulatedFace_DegenerateStrip(
     mesh = _mesh(StepToTopoDS_TranslateFace(ctf, tool, nm_tool, False, False))
     assert mesh is not None
     assert mesh.NbTriangles() == 1
+
+
+def _complex_set(points, pnmax, strips=None, fans=None, normals=None):
+    css = StepVisual_ComplexTriangulatedSurfaceSet()
+    css.Init(TCollection_HAsciiString("complex_set"), _coords(points), pnmax, normals, None, strips, fans)
+    return css
+
+
+def _normal_of(mesh, index):
+    a, b, c = mesh.Triangle(index).Get()
+    return gp_Vec(mesh.Node(a), mesh.Node(b)).Crossed(gp_Vec(mesh.Node(a), mesh.Node(c))), a
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexTriangleWinding_AgreesWithNormals(tools):
+    tool, nm_tool = tools[0], tools[1]
+    for is_fan in (False, True):
+        points = [(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0) if is_fan else (0.0, 1.0, 0.0),
+                  (0.0, 1.0, 0.0) if is_fan else (1.0, 1.0, 0.0)]
+        primitives = _transient_array(_int_array([1, 2, 3, 4]))
+        face = StepVisual_ComplexTriangulatedFace()
+        face.Init(TCollection_HAsciiString("oriented face"), _coords(points), 4, _normals([(0.0, 0.0, 1.0)]), False,
+                  StepVisual_FaceOrSurface(), None, None if is_fan else primitives, primitives if is_fan else None)
+        mesh = _mesh(StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False))
+        assert mesh is not None, is_fan
+        assert mesh.NbTriangles() == 2, is_fan
+        for i in range(1, mesh.NbTriangles() + 1):
+            normal, a = _normal_of(mesh, i)
+            assert normal.Dot(gp_Vec(mesh.Normal(a))) > 0.0, (is_fan, i)
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexStrip_CoincidentCoordinateConnectorHasNoTriangle(tools):
+    tool, nm_tool = tools[0], tools[1]
+    face = StepVisual_ComplexTriangulatedFace()
+    face.Init(TCollection_HAsciiString("strip connector"), _coords([(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)]), 4,
+              None, False, StepVisual_FaceOrSurface(), _int_array([1, 1, 2, 3]),
+              _transient_array(_int_array([1, 2, 3, 4])), None)
+    mesh = _mesh(StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False))
+    assert mesh is not None
+    assert mesh.NbTriangles() == 1
+    assert _normal_of(mesh, 1)[0].SquareMagnitude() > 0.0
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexStrip_RepeatedEndCoordinateHasNoTriangle(tools):
+    tool, nm_tool = tools[0], tools[1]
+    points = [(154.273254, -109.82325, 9.267262), (152.749252, -108.299248, 10.16), (153.0, -108.0, 11.0)]
+    face = StepVisual_ComplexTriangulatedFace()
+    face.Init(TCollection_HAsciiString("strip connector"), _coords(points), 5, None, False, StepVisual_FaceOrSurface(),
+              _int_array([1, 2, 2, 3, 1]), _transient_array(_int_array([1, 2, 3, 4, 5])), None)
+    mesh = _mesh(StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False))
+    assert mesh is not None
+    assert mesh.NbTriangles() == 1
+    assert _normal_of(mesh, 1)[0].SquareMagnitude() > 0.0
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexFan_PreservesSmallNonDegenerateTriangle(tools):
+    tool, nm_tool = tools[0], tools[1]
+    face = StepVisual_ComplexTriangulatedFace()
+    face.Init(TCollection_HAsciiString("small triangle"), _coords([(0.0, 0.0, 0.0), (1.0e-100, 0.0, 0.0), (0.0, 1.0e-100, 0.0)]),
+              3, None, False, StepVisual_FaceOrSurface(), None, None, _transient_array(_int_array([1, 2, 3])))
+    mesh = _mesh(StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False))
+    assert mesh is not None
+    assert mesh.NbTriangles() == 1
+    assert mesh.Triangle(1).Get() == (1, 2, 3)
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexPrimitives_RejectInvalidIndicesAndAcceptEmptyPrimitives(tools):
+    tool, nm_tool = tools[0], tools[1]
+    points = [(0, 0, 0), (1, 0, 0), (0, 1, 0)]
+    for is_surface_set in (False, True):
+        for is_fan in (False, True):
+            for case in range(5):
+                where = (is_surface_set, is_fan, case)
+                indices = _int_array(list(range(1, (2 if case == 3 else 3) + 1)))
+                if case < 3:
+                    indices.SetValue(1, 0 if case == 0 else (-1 if case == 1 else 4))
+                primitives = NCollection_HArray1[Standard_Transient](1, 1)
+                primitives.SetValue(1, None if case == 4 else indices)
+                strips, fans = (None, primitives) if is_fan else (primitives, None)
+                translator = StepToTopoDS_TranslateFace()
+                if is_surface_set:
+                    translator.Init(theTSS=_complex_set(points, 3, strips, fans), theTool=tool, theNMTool=nm_tool)
+                else:
+                    face = StepVisual_ComplexTriangulatedFace()
+                    face.Init(TCollection_HAsciiString("invalid face"), _coords(points), 3, None, False,
+                              StepVisual_FaceOrSurface(), None, strips, fans)
+                    translator.Init(theTF=face, theTool=tool, theNMTool=nm_tool, theReadTessellatedWhenNoBRepOnly=False)
+                if case == 3:
+                    assert translator.IsDone() is True, where
+                    assert _mesh(translator).NbTriangles() == 0, where
+                else:
+                    assert translator.IsDone() is False, where
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexPrimitives_MixedAndCollinear(tools):
+    tool, nm_tool = tools[0], tools[1]
+    for is_surface_set in (False, True):
+        for is_collinear in (False, True):
+            where = (is_surface_set, is_collinear)
+            points = [(0, 0, 0), (0, 1, 0), (0, 2, 0) if is_collinear else (0, 0, 1), (0, 3, 0) if is_collinear else (0, 1, 1)]
+            strips = _transient_array(_int_array([1, 2, 3, 4]))
+            fans = _transient_array(_int_array([1, 2, 3]))
+            translator = StepToTopoDS_TranslateFace()
+            if is_surface_set:
+                translator.Init(theTSS=_complex_set(points, 4, strips, fans), theTool=tool, theNMTool=nm_tool)
+            else:
+                face = StepVisual_ComplexTriangulatedFace()
+                face.Init(TCollection_HAsciiString("mixed face"), _coords(points), 4, None, False,
+                          StepVisual_FaceOrSurface(), None, strips, fans)
+                translator.Init(theTF=face, theTool=tool, theNMTool=nm_tool, theReadTessellatedWhenNoBRepOnly=False)
+            mesh = _mesh(translator)
+            assert mesh is not None, where
+            assert mesh.NbTriangles() == (0 if is_collinear else 3), where
+            for i in range(1, mesh.NbTriangles() + 1):
+                assert _normal_of(mesh, i)[0].X() > 0.0, (where, i)
+
+
+def test_StepToTopoDS_TranslateFaceTest_ComplexFan_RepeatedIndexKeepsOnlyValidTriangles(tools):
+    tool, nm_tool = tools[0], tools[1]
+    face = StepVisual_ComplexTriangulatedFace()
+    face.Init(TCollection_HAsciiString("fan"), _coords([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)]), 4, None, False,
+              StepVisual_FaceOrSurface(), None, None, _transient_array(_int_array([1, 2, 3, 3, 4])))
+    translator = StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False)
+    assert translator.IsDone() is True
+    mesh = _mesh(translator)
+    assert mesh is not None
+    assert mesh.NbTriangles() == 2
+    for i in (1, 2):
+        assert mesh.Triangle(i).Get() == (1, i + 1, i + 2)
+
+
+def test_StepToTopoDS_TranslateFaceTest_TessellatedItems_OnlyAllocateSupportedNormals(tools):
+    tool, nm_tool = tools[0], tools[1]
+    points = [(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0)]
+    triangles = [(1, 2, 3), (1, 3, 4)]
+    for kind in range(4):
+        for count, columns in ((0, 3), (1, 3), (2, 3), (4, 3), (1, 2)):
+            where = (kind, count, columns)
+            normals = None
+            if count != 0:
+                normals = NCollection_HArray2[float](1, count, 1, columns)
+                normals.Init(0.0)
+                for i in range(1, count + 1):
+                    normals.SetValue(i, columns, 1.0)
+            coords, name = _coords(points), TCollection_HAsciiString("normals")
+            fans = _transient_array(_int_array([1, 2, 3, 4]))
+            translator = StepToTopoDS_TranslateFace()
+            if kind == 0:
+                item = StepVisual_TriangulatedFace()
+                item.Init(name, coords, 4, normals, False, StepVisual_FaceOrSurface(), None, _triangles(triangles))
+                translator.Init(theTF=item, theTool=tool, theNMTool=nm_tool, theReadTessellatedWhenNoBRepOnly=False)
+            elif kind == 1:
+                item = StepVisual_TriangulatedSurfaceSet()
+                item.Init(name, coords, 4, normals, None, _triangles(triangles))
+                translator.Init(theTSS=item, theTool=tool, theNMTool=nm_tool)
+            elif kind == 2:
+                item = StepVisual_ComplexTriangulatedFace()
+                item.Init(name, coords, 4, normals, False, StepVisual_FaceOrSurface(), None, None, fans)
+                translator.Init(theTF=item, theTool=tool, theNMTool=nm_tool, theReadTessellatedWhenNoBRepOnly=False)
+            else:
+                item = StepVisual_ComplexTriangulatedSurfaceSet()
+                item.Init(name, coords, 4, normals, None, None, fans)
+                translator.Init(theTSS=item, theTool=tool, theNMTool=nm_tool)
+            assert translator.IsDone() is True, where
+            mesh = _mesh(translator)
+            assert mesh is not None, where
+            supported = columns == 3 and count in (1, 4)
+            assert mesh.HasNormals() == supported, where
+            if supported is False:
+                mesh.ComputeNormals()
+            for i in range(1, mesh.NbNodes() + 1):
+                assert mesh.Normal(i).Z() == pytest.approx(1.0, rel=1e-15, abs=1e-300), (where, i)
+
+
+def test_StepToTopoDS_TranslateFaceTest_TriangulatedFace_NormalCountUsesPnindexNodes(tools):
+    tool, nm_tool = tools[0], tools[1]
+    for count in (3, 4):
+        face = StepVisual_TriangulatedFace()
+        face.Init(TCollection_HAsciiString("mapped normals"),
+                  _coords([(-1.0, -1.0, 0.0), (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.0, 1.0, 0.0)]), 3,
+                  _normals([(0.0, 0.0, 1.0)] * count), False, StepVisual_FaceOrSurface(), _int_array([2, 3, 4]),
+                  _triangles([(1, 2, 3)]))
+        translator = StepToTopoDS_TranslateFace(face, tool, nm_tool, False, False)
+        assert translator.IsDone() is True, count
+        mesh = _mesh(translator)
+        assert mesh is not None, count
+        assert mesh.NbNodes() == 3, count
+        assert mesh.HasNormals() == (count == 3), count
+        if mesh.HasNormals() is True:
+            assert mesh.Normal(3).Z() == pytest.approx(1.0, rel=1e-15, abs=1e-300), count

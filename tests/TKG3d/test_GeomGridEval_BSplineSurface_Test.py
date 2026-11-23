@@ -250,3 +250,14 @@ def test_GeomGridEval_BSplineSurfaceTest_DerivativeDN_RationalSurface():
             if nu + nv == 0:
                 continue
             _check_dn(surf, 7, nu, nv)
+
+
+def test_GeomGridEval_BSplineSurfaceTest_CachedGridMatchesScalarAroundInteriorKnot():
+    surface = _multi_span()
+    evaluator = GeomGridEval_BSplineSurface(surface)
+    params = _floats([0.4, math.nextafter(0.5, 0.0), 0.5, math.nextafter(0.5, 1.0), 0.6])
+    points = evaluator.EvaluateGrid(params, params)
+    for ui in range(1, params.Length() + 1):
+        for vi in range(1, params.Length() + 1):
+            expected = surface.EvalD0(params[ui], params[vi])
+            assert points.Value(ui, vi).Distance(expected) <= TOL, f"u index {ui}, v index {vi}"

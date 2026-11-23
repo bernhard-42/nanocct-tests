@@ -1,8 +1,13 @@
 # Translated from OCCT src/ModelingData/TKG3d/GTests/Geom_OffsetCurve_Test.cxx (LGPL-2.1 with the OCCT exception)
+import math
+
 import pytest
 
-from nanocct.Geom import Geom_Circle, Geom_OffsetCurve
+from nanocct.Geom import Geom_BezierCurve, Geom_Circle, Geom_Ellipse, Geom_OffsetCurve
+from nanocct.GeomAdaptor import GeomAdaptor_Curve
+from nanocct.GeomGridEval import GeomGridEval_Curve
 from nanocct.gp import gp_Ax2, gp_Circ, gp_Dir, gp_Pnt
+from nanocct.NCollection import NCollection_Array1
 
 
 @pytest.fixture
@@ -47,3 +52,41 @@ def test_Geom_OffsetCurve_Test_CopyIndependence(original):
     original.SetOffsetValue(10.0)
     assert cp.Offset() == orig_offset
     assert cp.Offset() != original.Offset()
+
+
+def test_GeomOffsetCurveDerivativesTest_EllipseThirdOrderJetUsesNormalizedNormalDerivatives():
+    basis = Geom_Ellipse(gp_Ax2(), 2, 1)
+    curve = Geom_OffsetCurve(basis, 0.25, gp_Dir(0, 0, 1))
+    adaptor = GeomAdaptor_Curve(curve)
+    evaluator = GeomGridEval_Curve(adaptor)
+    params = NCollection_Array1[float](0, 0)
+    params[0] = 0.0
+    grid = evaluator.EvaluateGridD3(params)
+    for result in (curve.EvalD3(0), adaptor.EvalD3(0)):
+        assert result.Point.X() == pytest.approx(2.25, rel=1e-15)
+        assert result.D1.Y() == pytest.approx(1.5, rel=1e-15)
+        assert result.D2.X() == pytest.approx(-3.0, rel=1e-15)
+        assert result.D3.Y() == pytest.approx(-6.0, rel=1e-15)
+    assert grid.Size() == 1
+    first = grid[grid.Lower()]                      # C++ At(0): the first element, whatever the lower bound
+    assert first.D2.X() == pytest.approx(-3.0, rel=1e-15)
+    assert first.D3.Y() == pytest.approx(-6.0, rel=1e-15)
+    assert curve.EvalD2(0).D2.X() == pytest.approx(-3.0, rel=1e-15)
+
+
+def test_GeomOffsetCurveDerivativesTest_ScaledParabolaHasFiniteThirdNormalDerivative():
+    for scale in (1.0, 1.0e-45, 1.0e-53, 1.0e53):
+        poles = NCollection_Array1[gp_Pnt](3)
+        poles[0] = gp_Pnt(0, 0, 0)
+        poles[1] = gp_Pnt(0.5 * scale, 0, 0)
+        poles[2] = gp_Pnt(scale, scale, 0)
+        offset = Geom_OffsetCurve(Geom_BezierCurve(poles), 0.25, gp_Dir(0, 0, 1))
+        at_zero = offset.EvalD3(0)
+        assert at_zero.D3.X() == pytest.approx(-6.0, abs=1e-12), scale
+        assert at_zero.D3.Y() == pytest.approx(0.0, abs=1e-12), scale
+        at_one = offset.EvalD3(1)
+        denominator = 25 * math.sqrt(5.0)
+        assert at_one.D3.X() == pytest.approx(18 / denominator, abs=1e-12), scale
+        assert at_one.D3.Y() == pytest.approx(12 / denominator, abs=1e-12), scale
+        d2 = offset.EvalD2(0)
+        assert at_zero.D2.Y() == pytest.approx(d2.D2.Y(), abs=1e-12 * max(1.0, scale)), scale

@@ -1,12 +1,15 @@
 # Translated from OCCT src/ModelingAlgorithms/TKShHealing/GTests/ShapeAnalysis_Edge_Test.cxx (LGPL-2.1 with the OCCT exception)
 from nanocct import TopoDS
+from nanocct.BRep import BRep_Tool
 from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from nanocct.BRepPrimAPI import BRepPrimAPI_MakeBox
+from nanocct.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeSphere
 from nanocct.Geom import Geom_Circle
 from nanocct.gp import gp, gp_Ax2, gp_Pnt
 from nanocct.ShapeAnalysis import ShapeAnalysis_Edge
+from nanocct.ShapeExtend import ShapeExtend_OK
 from nanocct.TopAbs import TopAbs_EDGE, TopAbs_FACE
 from nanocct.TopExp import TopExp_Explorer
+from nanocct.TopoDS import TopoDS_Face
 
 
 def _line_edge():
@@ -48,3 +51,31 @@ def test_ShapeAnalysis_EdgeTest_IsSeam_NonSeam():
     assert edge_exp.More()
     edge = TopoDS.Edge(edge_exp.Current())
     assert not ShapeAnalysis_Edge().IsSeam(edge, face)
+
+
+def test_ShapeAnalysis_EdgeTest_DegeneratedEdgeResetsSameParameterDeviation():
+    sphere = BRepPrimAPI_MakeSphere(1.0)
+    sphere.Build()
+    assert sphere.IsDone() is True
+    analysis = ShapeAnalysis_Edge()
+    nb_degenerated = 0
+    exp = TopExp_Explorer(sphere.Shape(), TopAbs_EDGE)
+    while exp.More():
+        edge = TopoDS.Edge(exp.Current())
+        exp.Next()
+        if BRep_Tool.Degenerated_s(edge) is False:
+            bad, deviation = analysis.CheckSameParameter(edge)
+            assert bad is False
+            assert analysis.Status(ShapeExtend_OK) is True
+            assert 0.0 <= deviation <= BRep_Tool.Tolerance_s(edge)
+            continue
+        nb_degenerated += 1
+        bad, deviation = analysis.CheckSameParameter(edge)
+        assert bad is False
+        assert analysis.Status(ShapeExtend_OK) is True
+        assert deviation == 0.0
+        bad, deviation = analysis.CheckSameParameter(edge, TopoDS_Face())
+        assert bad is False
+        assert analysis.Status(ShapeExtend_OK) is True
+        assert deviation == 0.0
+    assert nb_degenerated > 0

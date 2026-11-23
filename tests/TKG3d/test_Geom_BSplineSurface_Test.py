@@ -532,3 +532,66 @@ def test_Geom_BSplineSurface_Test_OCC30990_CacheConsistencyAtKnots():
             if not same(p1, p2):
                 nb_err += 1
     assert nb_err == 0
+
+
+def test_Geom_BSplineSurfaceTest_PeriodicTrimUsesInteriorSeamDerivative():
+    corners = (gp_Pnt(1, 0, 0), gp_Pnt(0, 1, 0), gp_Pnt(-1, 0, 0), gp_Pnt(0, -1, 0))
+    for is_u in (True, False):
+        poles = NCollection_Array2[gp_Pnt](1, 4 if is_u else 2, 1, 2 if is_u else 4)
+        for item in range(1, 5):
+            for second in range(1, 3):
+                c = corners[item - 1]
+                point = gp_Pnt(c.X(), c.Y(), second - 1)
+                if is_u:
+                    poles.SetValue(item, second, point)
+                else:
+                    poles.SetValue(second, item, point)
+        periodic_knots = _reals(0, 1, 2, 3, 4)
+        periodic_mults = _ints(1, 1, 1, 1, 1)
+        linear_knots = _reals(0, 1)
+        linear_mults = _ints(2, 2)
+        surface = Geom_BSplineSurface(poles,
+                                      periodic_knots if is_u else linear_knots,
+                                      linear_knots if is_u else periodic_knots,
+                                      periodic_mults if is_u else linear_mults,
+                                      linear_mults if is_u else periodic_mults,
+                                      1, 1, is_u, not is_u)
+        adaptor = GeomAdaptor_Surface(surface)
+        for seam in (-4.0, 0.0, 4.0, 8.0):
+            for side in (-1, 1):
+                first = seam + (-0.25 if side < 0 else 0.0)
+                last = seam + (0.25 if side > 0 else 0.0)
+                trim = adaptor.UTrim(first, last, 0) if is_u else adaptor.VTrim(first, last, 0)
+                u = seam if is_u else 0.3
+                v = 0.3 if is_u else seam
+                if is_u:
+                    expected = adaptor.EvalD1(seam + side * 1.0e-6, v)
+                else:
+                    expected = adaptor.EvalD1(u, seam + side * 1.0e-6)
+                actual = trim.EvalD1(u, v)
+                where = f"{'U' if is_u else 'V'} periodic, seam {seam} side {side}"
+                assert actual.Point.IsEqual(adaptor.EvalD0(u, v), 1.0e-12), where
+                assert actual.D1U.IsEqual(expected.D1U, 1.0e-12, 1.0e-12), where
+                assert actual.D1V.IsEqual(expected.D1V, 1.0e-12, 1.0e-12), where
+                d2 = trim.EvalD2(u, v)
+                d3 = trim.EvalD3(u, v)
+                assert d2.Point.IsEqual(actual.Point, 1.0e-12), where
+                assert d3.Point.IsEqual(actual.Point, 1.0e-12), where
+                assert d2.D1U.IsEqual(expected.D1U, 1.0e-12, 1.0e-12), where
+                assert d2.D1V.IsEqual(expected.D1V, 1.0e-12, 1.0e-12), where
+                assert d3.D1U.IsEqual(expected.D1U, 1.0e-12, 1.0e-12), where
+                assert d3.D1V.IsEqual(expected.D1V, 1.0e-12, 1.0e-12), where
+                assert trim.EvalDN(u, v, 1, 0).IsEqual(expected.D1U, 1.0e-12, 1.0e-12), where
+                assert trim.EvalDN(u, v, 0, 1).IsEqual(expected.D1V, 1.0e-12, 1.0e-12), where
+                for delta in (-1.0e-12, 1.0e-12):
+                    bound = seam + delta
+                    lo = bound - (0.25 if side < 0 else 0.0)
+                    hi = bound + (0.25 if side > 0 else 0.0)
+                    near_trim = adaptor.UTrim(lo, hi, 0) if is_u else adaptor.VTrim(lo, hi, 0)
+                    near_u = bound if is_u else u
+                    near_v = v if is_u else bound
+                    direct = surface.EvalD1(near_u, near_v)
+                    near = near_trim.EvalD1(near_u, near_v)
+                    assert near.Point.Distance(direct.Point) <= 1.0e-14, where
+                    assert (near.D1U - direct.D1U).Magnitude() <= 1.0e-12, where
+                    assert (near.D1V - direct.D1V).Magnitude() <= 1.0e-12, where

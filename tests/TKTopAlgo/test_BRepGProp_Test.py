@@ -1,16 +1,18 @@
 # Translated from OCCT src/ModelingAlgorithms/TKTopAlgo/GTests/BRepGProp_Test.cxx (LGPL-2.1 with the OCCT exception)
 import math
 
+import pytest
+
 from nanocct.BRep import BRep_Builder
 from nanocct.BRepAlgoAPI import BRepAlgoAPI_Cut
-from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge
-from nanocct.BRepGProp import BRepGProp
+from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace
+from nanocct.BRepGProp import BRepGProp, BRepGProp_Domain, BRepGProp_Face, BRepGProp_Vinert, BRepGProp_VinertGK
 from nanocct.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
 from nanocct.GCPnts import GCPnts_AbscissaPoint
 from nanocct.Geom import Geom_BSplineCurve, Geom_Plane
 from nanocct.Geom2d import Geom2d_BSplineCurve
 from nanocct.GeomAdaptor import GeomAdaptor_Curve
-from nanocct.gp import gp_Dir, gp_Pnt, gp_Pnt2d
+from nanocct.gp import gp_Dir, gp_Pln, gp_Pnt, gp_Pnt2d
 from nanocct.GProp import GProp_GProps
 from nanocct.NCollection import NCollection_Array1
 from nanocct.Precision import Precision
@@ -135,3 +137,57 @@ def test_BRepGPropTest_LinearProperties_DegenerateEdgeWithBSplinePCurveNoCrash()
     props = _props(BRepGProp.LinearProperties_s, edge)
     assert math.isfinite(props.Mass())
     assert props.Mass() >= 0.0
+
+
+def _block_face():
+    builder = BRepBuilderAPI_MakeFace(gp_Pln(gp_Pnt(0.0, 0.0, 2.0), gp_Dir(0.0, 0.0, 1.0)), 0.0, 3.0, 0.0, 4.0)
+    assert builder.IsDone() is True
+    return builder.Face()
+
+
+def test_BRepGPropTest_VolumePropertiesByPlane_OffsetPlane_Inertia():
+    face = _block_face()
+    plane = gp_Pln(gp_Pnt(0.0, 0.0, 1.0), gp_Dir(0.0, 0.0, 1.0))
+    vinert = BRepGProp_Vinert(BRepGProp_Face(face), BRepGProp_Domain(face), plane, gp_Pnt(1.5, 2.0, 1.5))
+    inertia = vinert.MatrixOfInertia()
+    assert inertia.Value(1, 1) == pytest.approx(17.0, abs=1e-10)
+    assert inertia.Value(2, 2) == pytest.approx(10.0, abs=1e-10)
+    assert inertia.Value(3, 3) == pytest.approx(25.0, abs=1e-10)
+
+
+def test_BRepGPropTest_VolumePropertiesByPlane_OffsetPlane_MassAndCentre():
+    face = _block_face()
+    plane = gp_Pln(gp_Pnt(0.0, 0.0, 1.0), gp_Dir(0.0, 0.0, 1.0))
+    for location in (gp_Pnt(0.0, 0.0, 0.0), gp_Pnt(0.0, 0.0, 4.0)):
+        gk = BRepGProp_VinertGK(BRepGProp_Face(face), BRepGProp_Domain(face), plane, location, 1.0e-8, True)
+        assert gk.Mass() == pytest.approx(12.0, abs=1e-8), location.Z()
+        assert gk.CentreOfMass().X() == pytest.approx(1.5, abs=1e-8), location.Z()
+        assert gk.CentreOfMass().Y() == pytest.approx(2.0, abs=1e-8), location.Z()
+        assert gk.CentreOfMass().Z() == pytest.approx(1.5, abs=1e-8), location.Z()
+
+
+def _expect_gprops_near(actual, expected, tol):
+    assert actual.Mass() == pytest.approx(expected.Mass(), abs=tol)
+    for axis in ("X", "Y", "Z"):
+        assert getattr(actual.CentreOfMass(), axis)() == pytest.approx(getattr(expected.CentreOfMass(), axis)(), abs=tol)
+    a, e = actual.MatrixOfInertia(), expected.MatrixOfInertia()
+    for row in range(1, 4):
+        for col in range(1, 4):
+            assert a.Value(row, col) == pytest.approx(e.Value(row, col), abs=tol), (row, col)
+
+
+def test_BRepGPropTest_VinertByPlane_BoxVolume_KeepsMassAndCentre():
+    face = _block_face()
+    reference = gp_Pln(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0))
+    location = gp_Pnt(0.0, 0.0, 0.0)
+    # The volume between the face and the reference plane is a 3 x 4 x 2 block.
+    block = GProp_GProps()
+    BRepGProp.VolumeProperties_s(BRepPrimAPI_MakeBox(3.0, 4.0, 2.0).Shape(), block)
+    fixed = BRepGProp_Vinert(BRepGProp_Face(face), BRepGProp_Domain(face), reference, location)
+    adaptive = BRepGProp_Vinert(BRepGProp_Face(face), BRepGProp_Domain(face), reference, location, 1.0e-8)
+    for props in (fixed, adaptive):
+        assert props.Mass() == pytest.approx(24.0, abs=1e-10)
+        assert props.CentreOfMass().X() == pytest.approx(1.5, abs=1e-10)
+        assert props.CentreOfMass().Y() == pytest.approx(2.0, abs=1e-10)
+        assert props.CentreOfMass().Z() == pytest.approx(1.0, abs=1e-10)
+        _expect_gprops_near(props, block, 1.0e-9)

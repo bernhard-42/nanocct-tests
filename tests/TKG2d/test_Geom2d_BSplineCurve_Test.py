@@ -8,6 +8,7 @@ import pytest
 from nanocct.Geom2d import Geom2d_BSplineCurve
 from nanocct.gp import gp_Pnt2d, gp_Trsf2d, gp_Vec2d
 from nanocct.NCollection import NCollection_Array1
+from nanocct.Precision import Precision
 
 
 def poles(*pts):
@@ -282,3 +283,23 @@ def test_Geom2d_BSplineCurve_Test_WeightsArray_Rational_ReturnsOwning():
     assert w.Length() == 4
     for i, e in enumerate((1.0, 2.0, 3.0, 1.0), 1):
         deq(w[i], e)
+
+
+def test_Geom2dBSplineCurveTest_IsG1_PeriodicTranslatedIntervals_CheckCornersAndTheSeam():
+    pts = NCollection_Array1[gp_Pnt2d](4)
+    for i, p in enumerate(((0, 0), (4, 0), (4, 4), (0, 4))):
+        pts[i] = gp_Pnt2d(*p)
+    knots = NCollection_Array1[float](5)
+    mults = NCollection_Array1[int](5)
+    mults.Init(1)
+    for i in range(5):
+        knots[i] = float(i)
+    source = Geom2d_BSplineCurve(pts, knots, mults, 1, True)
+    ang = Precision.Angular_s()
+    for shift in (-8.0, 0.0, 4.0, 12.0):
+        assert source.IsG1(shift + 0.25, shift + 0.75, ang) is True
+        assert source.IsG1(shift + 0.25, shift + 1.75, ang) is False
+        assert source.IsG1(shift - 0.25, shift + 0.25, ang) is False
+        assert source.IsG1(shift + 0.25, shift + 4.25, ang) is False
+    assert source.FirstParameter() == 0.0
+    assert source.LastParameter() == 4.0

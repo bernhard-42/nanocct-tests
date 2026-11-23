@@ -1,6 +1,8 @@
 # Translated from OCCT src/ModelingAlgorithms/TKOffset/GTests/BRepOffsetAPI_MakePipeShell_Test.cxx (LGPL-2.1 with the OCCT exception)
 import math
 
+import pytest
+
 from nanocct import TopoDS
 from nanocct.BRep import BRep_Builder, BRep_Tool
 from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakeFace, BRepBuilderAPI_MakeWire
@@ -13,9 +15,10 @@ from nanocct.GProp import GProp_GProps
 from nanocct.gp import gp_Ax1, gp_Ax2, gp_Circ, gp_Dir, gp_Pln, gp_Pnt, gp_Vec
 from nanocct.Law import Law_Linear
 from nanocct.Precision import Precision
+from nanocct.Standard import Standard_ConstructionError
 from nanocct.TopAbs import TopAbs_FACE, TopAbs_WIRE
 from nanocct.TopExp import TopExp_Explorer
-from nanocct.TopoDS import TopoDS_Shell, TopoDS_Solid
+from nanocct.TopoDS import TopoDS_Shell, TopoDS_Solid, TopoDS_Wire
 
 
 def _wire_length(wire):
@@ -134,3 +137,15 @@ def test_BRepOffsetAPI_MakePipeShellTest_Bug332_BentTubeWithScalingLaw():
     assert count_matching(math.pi * dia1) >= 1
     assert count_matching(math.pi * (dia1 + 2.0 * wall)) >= 2
     assert count_matching(math.pi * (dia2 + 2.0 * wall)) >= 1
+
+
+def test_BRepOffsetAPI_MakePipeShell_Test_NullAuxiliarySpinePreservesMode():
+    spine = BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(gp_Pnt(0, 0, 0), gp_Pnt(0, 0, 10)).Edge()).Wire()
+    pipe = BRepOffsetAPI_MakePipeShell(spine)
+    with pytest.raises(Standard_ConstructionError):
+        pipe.SetMode(TopoDS_Wire(), True)
+    profile = BRepBuilderAPI_MakeWire(BRepBuilderAPI_MakeEdge(gp_Pnt(0, 0, 0), gp_Pnt(1, 0, 0)).Edge()).Wire()
+    pipe.Add(profile)
+    pipe.Build()
+    assert pipe.IsDone() is True
+    assert BRepCheck_Analyzer(pipe.Shape()).IsValid() is True

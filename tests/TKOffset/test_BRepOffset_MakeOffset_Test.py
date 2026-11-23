@@ -5,7 +5,7 @@ from nanocct.BRepAlgoAPI import BRepAlgoAPI_Fuse
 from nanocct.BRepBuilderAPI import BRepBuilderAPI_MakeEdge, BRepBuilderAPI_MakePolygon, BRepBuilderAPI_MakeWire
 from nanocct.BRepCheck import BRepCheck_Analyzer
 from nanocct.BRepOffset import BRepOffset_Skin
-from nanocct.BRepOffsetAPI import BRepOffsetAPI_MakeThickSolid, BRepOffsetAPI_ThruSections
+from nanocct.BRepOffsetAPI import BRepOffsetAPI_MakeOffset, BRepOffsetAPI_MakeThickSolid, BRepOffsetAPI_ThruSections
 from nanocct.BRepPrimAPI import BRepPrimAPI_MakeBox, BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
 from nanocct.GeomAbs import GeomAbs_Intersection
 from nanocct.gp import gp_Ax2, gp_Circ, gp_Dir, gp_Elips, gp_Pnt, gp_Vec
@@ -207,3 +207,37 @@ def test_BRepOffset_MakeOffsetTest_ThickSolid_CircleToOctagonLoft():
     circle = _circular_wire(gp_Pnt(0, 0, 0), NORMAL, 50.0)
     octagon = _polygonal_wire(gp_Pnt(0, 0, 100), NORMAL, 55.0, 8)
     assert _thick(_loft([circle, octagon])).IsDone()
+
+
+def _is_circular_wire_offset_done(diameter, offset):
+    wire = _circular_wire(gp_Pnt(0.0, 0.0, 0.0), gp_Dir(0.0, 0.0, 1.0), diameter / 2.0)
+    if wire.IsNull() is True:
+        return False
+    maker = BRepOffsetAPI_MakeOffset()
+    maker.Init(GeomAbs_Intersection)
+    maker.AddWire(wire)
+    maker.Perform(offset)
+    return maker.IsDone()
+
+
+_TAPER_OFFSET = math.tan(-1.0 * math.pi / 180.0) * 3.0          # a -1 degree taper over a pad length of 3
+
+
+def test_BRepOffset_MakeOffsetTest_NegativeTaperOffsetOnSmallCircularWire():
+    assert _is_circular_wire_offset_done(2.0, _TAPER_OFFSET) is True
+
+
+def test_BRepOffset_MakeOffsetTest_NegativeTaperOffsetAboveSmallCircleBoundary():
+    assert _is_circular_wire_offset_done(2.01, _TAPER_OFFSET) is True
+
+
+def test_BRepOffset_MakeOffsetTest_NegativeTaperOffsetBelowSmallCircleBoundary():
+    assert _is_circular_wire_offset_done(1.0, _TAPER_OFFSET) is True
+
+
+def test_BRepOffset_MakeOffsetTest_PositiveOffsetOnSmallCircularWire():
+    assert _is_circular_wire_offset_done(2.0, 0.05) is True
+
+
+def test_BRepOffset_MakeOffsetTest_CollapsedCircularWireOffsetIsNotDone():
+    assert _is_circular_wire_offset_done(2.0, -1.0) is False

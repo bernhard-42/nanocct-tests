@@ -8,6 +8,7 @@ import pytest
 from nanocct.Geom2d import Geom2d_BezierCurve
 from nanocct.gp import gp_Pnt2d, gp_Trsf2d, gp_Vec2d
 from nanocct.NCollection import NCollection_Array1
+from nanocct.Precision import Precision
 
 
 def poles(*pts):
@@ -279,3 +280,22 @@ def test_Geom2d_BezierCurve_Test_WeightsArray_Rational_ReturnsOwning():
     deq(w[1], 1.0)
     deq(w[2], 2.0)
     deq(w[3], 1.0)
+
+
+def test_Geom2d_BezierCurve_Test_InsertPoleAfter_GrowsToTheConstructorLimit():
+    # MaxDegree() bounds the degree, so MaxDegree() + 1 poles are legal, as the constructor allows.
+    max_poles = Geom2d_BezierCurve.MaxDegree_s() + 1
+    all_poles = NCollection_Array1[gp_Pnt2d](1, max_poles)
+    for i in range(1, max_poles + 1):
+        all_poles[i] = gp_Pnt2d(i, 0.0)
+    Geom2d_BezierCurve(all_poles)
+
+    some = NCollection_Array1[gp_Pnt2d](1, max_poles - 1)
+    for i in range(1, max_poles):
+        some[i] = all_poles[i]
+    curve = Geom2d_BezierCurve(some)
+    curve.InsertPoleAfter(max_poles - 1, all_poles[max_poles])
+    assert curve.NbPoles() == max_poles
+    assert curve.Degree() == Geom2d_BezierCurve.MaxDegree_s()
+    assert curve.EndPoint().X() == pytest.approx(float(max_poles), abs=Precision.Confusion_s())
+    # The refusal past this length is not checked, as in OCCT's test: a release build of OCCT defines the check away.

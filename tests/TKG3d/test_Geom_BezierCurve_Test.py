@@ -6,7 +6,8 @@ import pytest
 from nanocct.Geom import Geom_BezierCurve
 from nanocct.GeomAbs import GeomAbs_Shape
 from nanocct.NCollection import NCollection_Array1
-from nanocct.Standard import Standard_Failure
+from nanocct.Precision import Precision
+from nanocct.Standard import Standard_ConstructionError, Standard_Failure
 from nanocct.gp import gp_Pnt, gp_Trsf, gp_Vec
 
 
@@ -329,3 +330,24 @@ def test_Geom_BezierCurveTest_OCC2569_ThrowsForTooManyPoles():
         a.SetValue(i, gp_Pnt(i + 10, i * 2 + 20, i * 3 + 45))
     with pytest.raises(Standard_Failure):
         Geom_BezierCurve(a)
+
+
+def test_Geom_BezierCurve_Test_InsertPoleAfter_GrowsToTheConstructorLimit():
+    # MaxDegree() bounds the degree, so MaxDegree() + 1 poles are legal, as the constructor allows.
+    max_poles = Geom_BezierCurve.MaxDegree_s() + 1
+    all_poles = NCollection_Array1[gp_Pnt](1, max_poles)
+    for i in range(1, max_poles + 1):
+        all_poles[i] = gp_Pnt(i, 0.0, 0.0)
+    Geom_BezierCurve(all_poles)
+
+    poles = NCollection_Array1[gp_Pnt](1, max_poles - 1)
+    for i in range(1, max_poles):
+        poles[i] = all_poles[i]
+    curve = Geom_BezierCurve(poles)
+    curve.InsertPoleAfter(max_poles - 1, all_poles[max_poles])
+    assert curve.NbPoles() == max_poles
+    assert curve.Degree() == Geom_BezierCurve.MaxDegree_s()
+    assert curve.EndPoint().X() == pytest.approx(float(max_poles), abs=Precision.Confusion_s())
+
+    with pytest.raises(Standard_ConstructionError):
+        curve.InsertPoleAfter(max_poles, all_poles[max_poles])
