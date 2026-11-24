@@ -1522,12 +1522,8 @@ def test_BRepGraphIncTest_Relations_SetChildRefChildNodeId_CrossKindRebinds():
     g.Editor().Gen().SetChildRefChildNodeId(child_ref, BRepGraph_NodeId(shell))
 
     old_solid = BRepGraph_SolidId.FromNodeId_s(old_child)
-    # Keep the ref vectors alive in variables: passing the temporary straight into the
-    # iterator constructor segfaults in nanocct (the iterator does not keep its argument alive).
-    old_refs = g.Topo().Gen().CompoundRefIds(BRepGraph_NodeId(old_solid))
-    new_refs = g.Topo().Gen().CompoundRefIds(BRepGraph_NodeId(shell))
-    old_comps = list(BRepGraph_CompoundsOfChild(g, old_refs))
-    new_comps = list(BRepGraph_CompoundsOfChild(g, new_refs))
+    old_comps = list(BRepGraph_CompoundsOfChild(g, g.Topo().Gen().CompoundRefIds(BRepGraph_NodeId(old_solid))))
+    new_comps = list(BRepGraph_CompoundsOfChild(g, g.Topo().Gen().CompoundRefIds(BRepGraph_NodeId(shell))))
     assert comp0 not in old_comps
     assert comp0 in new_comps
     assert g.ValidateRelations()

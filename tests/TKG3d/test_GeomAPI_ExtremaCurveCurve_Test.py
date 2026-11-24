@@ -224,9 +224,7 @@ def test_GeomAPI_ExtremaCurveCurve_Test_OCC862_ExtremaBSplineAndLine():
     c2 = Geom_TrimmedCurve(line, 0.0, (p2 - p1).Modulus())
 
     ex = GeomAPI_ExtremaCurveCurve(c1, c2)
-    # OCCT calls anEx.Extrema().IsParallel(); nanocct aborts the process in Extrema()
-    # (nanobind critical error), so the equivalent ex.IsParallel() is used instead.
-    if ex.IsParallel():
+    if ex.Extrema().IsParallel():
         assert ex.LowerDistance() > 0.0
     else:
         nb = ex.NbExtrema()
