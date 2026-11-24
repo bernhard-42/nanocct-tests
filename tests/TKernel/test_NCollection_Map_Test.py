@@ -1,5 +1,5 @@
 # Translated from OCCT src/FoundationClasses/TKernel/GTests/NCollection_Map_Test.cxx (LGPL-2.1 with the OCCT exception)
-# Skipped: Emplace/Emplaced/Contained (not bound), custom hashers, STL begin()/end() iterator tests.
+# Skipped: Emplace/Emplaced (not bound), custom hashers, STL begin()/end() iterator tests.
 # NCollection_MapAlgo is not bound; its Union/Intersection/... are used through the equivalent NCollection_Map members.
 from nanocct.NCollection import NCollection_Map
 
@@ -195,3 +195,30 @@ def test_NCollection_MapTest_RangeBasedForLoop():
     for aKey in aMap:
         aFoundKeys.add(aKey)
     assert aFoundKeys == {100, 200, 300}
+
+
+def test_NCollection_MapTest_ContainedFound():
+    aMap = MapInt()
+    aMap.Add(10)
+    aMap.Add(20)
+    aMap.Add(30)
+
+    aResult = aMap.Contained(10)                 # std::optional<std::reference_wrapper<const int>>: the key, or None
+    assert aResult is not None
+    assert aResult == 10
+
+    aResult = aMap.Contained(30)
+    assert aResult is not None
+    assert aResult == 30
+
+
+def test_NCollection_MapTest_ContainedNotFound():
+    aMap = MapInt()
+    aMap.Add(10)
+
+    aResult = aMap.Contained(99)
+    assert aResult is None
+
+    # Contained on empty map
+    anEmptyMap = MapInt()
+    assert anEmptyMap.Contained(10) is None
