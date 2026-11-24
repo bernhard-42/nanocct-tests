@@ -76,10 +76,6 @@ C++ GTest files of OCCT 8.0.2 that have no Python port here, each with the reaso
 | `src/ModelingAlgorithms/TKExpress/GTests/Expr_GeneralExpression_Test.cxx` | 3 | TKExpress is out of scope (nanocct docs/Design.md) |
 | `src/ModelingData/TKBRep/GTests/BRepGraph_TypedIdDispatch_Test.cxx` | 2 | `BRepGraph_NodeId::Visit` / `RefId::Visit` are member templates taking a C++ generic lambda |
 | `src/ModelingData/TKGeomBase/GTests/AppCont_ContMatrices_Test.cxx` | 9 | the private header `AppCont_ContMatrices.pxx` (not installed, not bound) |
-| `src/ModelingData/TKGeomBase/GTests/GeomBndLib_Curve2d_Test.cxx` | 21 | **pending: as GeomBndLib_Curve (`GeomBndLib_Curve2d`)** |
-| `src/ModelingData/TKGeomBase/GTests/GeomBndLib_Curve_Test.cxx` | 25 | **pending: `GeomBndLib_Curve` is not bound -- its public header includes `GeomBndLib_InfiniteHelpers.pxx`, which OCCT 8.0.2 does not install (nanocct generator/overrides.toml)**; one case uses the private `GeomBndLib_SamplingHelpers.pxx` |
-| `src/ModelingData/TKGeomBase/GTests/GeomBndLib_OffsetCurve2d_Test.cxx` | 10 | **pending: as GeomBndLib_Curve (`GeomBndLib_Curve2d`)** |
-| `src/ModelingData/TKGeomBase/GTests/GeomBndLib_OffsetCurve_Test.cxx` | 14 | **pending: as GeomBndLib_Curve** |
 | `src/Visualization/TKService/GTests/Aspect_Grid_Bounds_Test.cxx` | 5 | stub subclasses of the abstract `Aspect_RectangularGrid` / `Aspect_CircularGrid` (no trampolines) |
 | `src/Visualization/TKService/GTests/Graphic3d_ShaderManager_Test.cxx` | 3 | protected members reached through a C++ test subclass |
 | `src/Visualization/TKV3d/GTests/AIS_ColoredShape_Test.cxx` | 6 | the protected static `dispatchColors`, reached through a C++ test subclass |
