@@ -61,7 +61,7 @@ C++ GTest files of OCCT 8.0.2 that have no Python port here, each with the reaso
 | `src/FoundationClasses/TKernel/GTests/NCollection_FlatMap_Test.cxx` | 24 | no `<int>`/`<AsciiString>` instantiation; **pending: as NCollection_FlatDataMap** |
 | `src/FoundationClasses/TKernel/GTests/NCollection_ForwardRange_Test.cxx` | 22 | C++ templates on mock iterators (SFINAE, range-for, iterator traits); ForwardRange is not bound |
 | `src/FoundationClasses/TKernel/GTests/NCollection_KDTree_Test.cxx` | 187 | `NCollection_KDTree` is not bound (docs/Excluded.md); custom point types |
-| `src/FoundationClasses/TKernel/GTests/NCollection_LocalArray_Test.cxx` | 32 | a compile-time size, move semantics and custom element types; **pending: `NCollection_LocalArray.ToArray1()` views are not guarded against `Reallocate` -- port the portable cases after that fix** |
+| `src/FoundationClasses/TKernel/GTests/NCollection_LocalArray_Test.cxx` | 32 | the cases use `int` and custom element types, a compile-time size other than the default 1024, move semantics, or the `T*` conversion; nanocct binds only `NCollection_LocalArray<double>` (its `ToArray1()` view is guarded since 2026-11-24), so the 6 cases that do not depend on the element type would need it as a stand-in |
 | `src/FoundationClasses/TKernel/GTests/NCollection_OrderedDataMap_Test.cxx` | 47 | `NCollection_OrderedDataMap` is not bound (docs/Excluded.md) |
 | `src/FoundationClasses/TKernel/GTests/NCollection_OrderedMap_Test.cxx` | 38 | `NCollection_OrderedMap` is not bound (docs/Excluded.md) |
 | `src/FoundationClasses/TKernel/GTests/NCollection_SparseArray_Test.cxx` | 8 | `NCollection_SparseArray` is not bound (docs/Excluded.md); a custom item type |
