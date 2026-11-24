@@ -11,6 +11,11 @@ from nanocct.math import math_Matrix, math_Vector
 CONF = 1e-7
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def check_vectors_equal(v1, v2, tol=CONF):
     assert v1.Length() == v2.Length()
     assert v1.Lower() == v2.Lower()
@@ -61,16 +66,16 @@ def test_MathVectorTest_GeometryConstructors():
     assert vxy.Length() == 2
     assert vxy.Lower() == 1
     assert vxy.Upper() == 2
-    assert vxy(1) == pytest.approx(3.5)
-    assert vxy(2) == pytest.approx(4.5)
+    assert vxy(1) == _eq(3.5)
+    assert vxy(2) == _eq(4.5)
 
     vxyz = math_Vector(gp_XYZ(1.1, 2.2, 3.3))
     assert vxyz.Length() == 3
     assert vxyz.Lower() == 1
     assert vxyz.Upper() == 3
-    assert vxyz(1) == pytest.approx(1.1)
-    assert vxyz(2) == pytest.approx(2.2)
-    assert vxyz(3) == pytest.approx(3.3)
+    assert vxyz(1) == _eq(1.1)
+    assert vxyz(2) == _eq(2.2)
+    assert vxyz(3) == _eq(3.3)
 
 
 def test_MathVectorTest_InitAndAccess():
@@ -114,12 +119,12 @@ def test_MathVectorTest_Normalization():
 
 def test_MathVectorTest_ZeroVectorHandling():
     z = math_Vector(1, 3, 0.0)
-    assert z.Norm() == pytest.approx(0.0)
+    assert z.Norm() == _eq(0.0)
 
     nz = vec(1, [1.0, 0.0, 0.0])
-    assert nz.Norm() == pytest.approx(1.0)
+    assert nz.Norm() == _eq(1.0)
     nz.Normalize()
-    assert nz.Norm() == pytest.approx(1.0)
+    assert nz.Norm() == _eq(1.0)
 
 
 def test_MathVectorTest_Inversion():
@@ -169,11 +174,11 @@ def test_MathVectorTest_ScalarOperations():
 def test_MathVectorTest_DivisionOperations():
     v = math_Vector(1, 3, 2.0)
     v.Divide(2.0)
-    assert v(1) == pytest.approx(1.0)
+    assert v(1) == _eq(1.0)
 
     v2 = math_Vector(1, 3, 4.0)
     r = v2.Divided(2.0)
-    assert r(1) == pytest.approx(2.0)
+    assert r(1) == _eq(2.0)
 
 
 def test_MathVectorTest_VectorAdditionSubtraction():
@@ -346,7 +351,7 @@ def _resize_case(lo, n_init, new_size, value=lambda i: float(i)):
     assert v.Lower() == lo
     assert v.Upper() == lo + new_size - 1
     for i in range(lo, lo + min(n_init, new_size)):
-        assert v(i) == pytest.approx(value(i))
+        assert v(i) == _eq(value(i))
 
 
 def test_MathVectorTest_Resize_StackToStack_SameSize():
@@ -383,7 +388,7 @@ def test_MathVectorTest_Multiply_RowVectorByMatrix_AllComponentsEqual():
     r = math_Vector(1, 6)
     r.Multiply(v, m)
     for i in range(1, 7):
-        assert r(i) == pytest.approx(120.0)
+        assert r(i) == _eq(120.0)
 
 
 def test_MathVectorTest_TMultiply_RowVectorByTransposedMatrix_ModifiedComponent():
@@ -392,7 +397,7 @@ def test_MathVectorTest_TMultiply_RowVectorByTransposedMatrix_ModifiedComponent(
     r = math_Vector(1, 6)
     m[2, 1] += 1.0
     r.TMultiply(v, m)
-    assert r(1) == pytest.approx(120.0)
-    assert r(2) == pytest.approx(125.0)
+    assert r(1) == _eq(120.0)
+    assert r(2) == _eq(125.0)
     for i in range(3, 7):
-        assert r(i) == pytest.approx(120.0)
+        assert r(i) == _eq(120.0)

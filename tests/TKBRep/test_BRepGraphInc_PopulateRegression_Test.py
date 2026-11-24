@@ -358,7 +358,9 @@ def test_BRepGraphInc_PopulateRegressionTest_Perform_ReplacesGraphThroughClearSe
 
     eid = BRepGraph_EdgeId.Start_s()
     g.Mesh().Editor().Edges().SetCachedPolygon3D(eid, Poly_Polygon3D(2, False))
-    # Entry() returns a raw struct pointer (not bound); Has() is documented as "Entry() would return non-null"
+    # Entry() is not bound: its type BRepGraph_CacheMesh::EdgeMeshEntry is not (BRepGraph_CacheMesh, nanocct
+    # docs/Excluded.md). Has() stands in for Entry() != nullptr; it is Entry() != nullptr && the entry has a
+    # Polygon3D (BRepGraph_MeshView.cxx), so the final "no entry" check would also pass for an entry with no polygon.
     assert g.Mesh().Cache().Edges().Has(eid)
 
     assert BRepGraphInc_Populate.Perform_s(g, BRepPrimAPI_MakeBox(2.0, 2.0, 2.0).Shape(), False) != FAILED

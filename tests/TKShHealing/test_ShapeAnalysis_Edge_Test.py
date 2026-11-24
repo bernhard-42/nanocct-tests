@@ -70,6 +70,10 @@ def test_ShapeAnalysis_EdgeTest_DegeneratedEdgeResetsSameParameterDeviation():
             assert 0.0 <= deviation <= BRep_Tool.Tolerance_s(edge)
             continue
         nb_degenerated += 1
+        # C++ sets the in/out deviation to 1.0 first, so the checks below catch a degenerated edge that leaves it
+        # unchanged. maxdev is an output only (OCCT writes 0.0 before reading it, ShapeAnalysis_Edge.cxx:710), and
+        # the binding returns it from a fresh 0.0 (R-OUT): the stale value cannot reach Python, so these deviation
+        # checks pass whether or not OCCT resets it.
         bad, deviation = analysis.CheckSameParameter(edge)
         assert bad is False
         assert analysis.Status(ShapeExtend_OK) is True

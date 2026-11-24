@@ -6,6 +6,11 @@ from nanocct.BVH import BVH_Vec3d
 from nanocct.Graphic3d import Graphic3d_BndBox3d
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def _corners(box):
     lo, hi = box.CornerMin(), box.CornerMax()
     return (lo.x(), lo.y(), lo.z()), (hi.x(), hi.y(), hi.z())
@@ -45,7 +50,7 @@ def test_Graphic3d_BndBox3dTest_CombineBoxes():
 def test_Graphic3d_BndBox3dTest_BoxSize():
     box = Graphic3d_BndBox3d(BVH_Vec3d(0.5, -2.0, -3.0), BVH_Vec3d(3.5, 1.0, 3.0))
     size = box.Size()
-    assert (size.x(), size.y(), size.z()) == pytest.approx((3.0, 3.0, 6.0))
+    assert (size.x(), size.y(), size.z()) == _eq((3.0, 3.0, 6.0))
 
 
 def test_Graphic3d_BndBox3dTest_BoxCenter():
@@ -56,4 +61,4 @@ def test_Graphic3d_BndBox3dTest_BoxCenter():
 
 def test_Graphic3d_BndBox3dTest_BoxArea():
     box = Graphic3d_BndBox3d(BVH_Vec3d(0.0, 0.0, 0.0), BVH_Vec3d(2.0, 3.0, 4.0))
-    assert box.Area() == pytest.approx(52.0)
+    assert box.Area() == _eq(52.0)

@@ -48,13 +48,18 @@ def test_BVH_BuildQueueTest_FetchSingleItem():
 
 def test_BVH_BuildQueueTest_FetchFIFOOrder():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     q.Enqueue(10)
     q.Enqueue(20)
     q.Enqueue(30)
-    assert q.Fetch(False) == (10, True)
-    assert q.Fetch(False) == (20, True)
-    assert q.Fetch(False) == (30, True)
-    assert q.Fetch(False) == (-1, False)
+    result, was_busy = q.Fetch(was_busy)
+    assert (result, was_busy) == (10, True)
+    result, was_busy = q.Fetch(was_busy)
+    assert (result, was_busy) == (20, True)
+    result, was_busy = q.Fetch(was_busy)
+    assert (result, was_busy) == (30, True)
+    result, was_busy = q.Fetch(was_busy)
+    assert (result, was_busy) == (-1, False)
 
 
 def test_BVH_BuildQueueTest_ThreadCountTracking():
@@ -75,41 +80,51 @@ def test_BVH_BuildQueueTest_ThreadCountTracking():
 
 def test_BVH_BuildQueueTest_AlternatingEnqueueFetch():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     q.Enqueue(1)
     assert q.Size() == 1
-    assert q.Fetch(False)[0] == 1
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 1
     assert q.Size() == 0
     q.Enqueue(2)
     assert q.Size() == 1
-    assert q.Fetch(False)[0] == 2
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 2
     assert q.Size() == 0
 
 
 def test_BVH_BuildQueueTest_LargeQueue():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     count = 1000
     for i in range(count):
         q.Enqueue(i)
     assert q.Size() == count
     for i in range(count):
-        assert q.Fetch(False)[0] == i
+        result, was_busy = q.Fetch(was_busy)
+        assert result == i
     assert q.Size() == 0
 
 
 def test_BVH_BuildQueueTest_NegativeValues():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     q.Enqueue(-1)
     q.Enqueue(-100)
     q.Enqueue(0)
-    assert q.Fetch(False)[0] == -1
-    assert q.Fetch(False)[0] == -100
-    assert q.Fetch(False)[0] == 0
+    result, was_busy = q.Fetch(was_busy)
+    assert result == -1
+    result, was_busy = q.Fetch(was_busy)
+    assert result == -100
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 0
 
 
 def test_BVH_BuildQueueTest_RepeatedFetchFromEmpty():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     for _ in range(10):
-        result, was_busy = q.Fetch(False)
+        result, was_busy = q.Fetch(was_busy)
         assert result == -1
         assert not was_busy
     assert not q.HasBusyThreads()
@@ -124,26 +139,33 @@ def test_BVH_BuildQueueTest_EnqueueZero():
 
 def test_BVH_BuildQueueTest_DuplicateValues():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     q.Enqueue(5)
     q.Enqueue(5)
     q.Enqueue(5)
     assert q.Size() == 3
-    assert q.Fetch(False)[0] == 5
-    assert q.Fetch(False)[0] == 5
-    assert q.Fetch(False)[0] == 5
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 5
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 5
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 5
 
 
 def test_BVH_BuildQueueTest_SingleThreadWorkflow():
     q = BVH_BuildQueue()
+    was_busy = False  # one in/out flag for all Fetch calls, as the C++ wasBusy
     q.Enqueue(0)
-    node, was_busy = q.Fetch(False)
+    node, was_busy = q.Fetch(was_busy)
     assert node == 0
     assert was_busy
     q.Enqueue(1)
     q.Enqueue(2)
     assert q.Size() == 2
-    assert q.Fetch(False)[0] == 1
-    assert q.Fetch(False)[0] == 2
-    node, was_busy = q.Fetch(False)
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 1
+    result, was_busy = q.Fetch(was_busy)
+    assert result == 2
+    node, was_busy = q.Fetch(was_busy)
     assert node == -1
     assert not was_busy

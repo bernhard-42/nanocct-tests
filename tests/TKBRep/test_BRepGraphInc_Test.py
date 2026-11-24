@@ -343,6 +343,9 @@ def test_BRepGraphIncTest_Storage_GenericIdDispatch_UsesTypedHelpers():
 
     assert s.MarkRemoved(BRepGraph_NodeId(vid))
     assert s.MarkRemovedRef(BRepGraph_RefId(frid))
+    # Not translated: EXPECT_TRUE(IsRemoved(aVertexId)) and IsRemoved(aFaceRefId). IsRemoved is a member template
+    # (BRepGraphInc_Storage.hxx: template <typename T> bool IsRemoved(const T)), not bound (R-UNSUPPORTED), and the
+    # entities carry no removed flag of their own; the active counts below show the removal.
     assert s.NbActiveVertices() == 0
     assert s.NbActiveFaceRefs() == 0
 

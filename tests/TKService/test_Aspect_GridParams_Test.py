@@ -19,17 +19,22 @@ from nanocct.Standard import Standard_NegativeValue
 TOL = Precision.Confusion_s()
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def test_Aspect_GridParamsTest_Defaults_AreReasonable():
     p = Aspect_GridParams()
     assert p.Color().Name() == Quantity_NOC_GRAY70
     assert p.AccentColor().Name() == Quantity_NOC_GRAY50
-    assert p.Scale() == pytest.approx(0.01)
+    assert p.Scale() == _eq(0.01)
     assert p.ScaleY() == 0.0
-    assert p.EffectiveScaleY() == pytest.approx(0.01)
+    assert p.EffectiveScaleY() == _eq(0.01)
     assert p.AccentScaleX() == 0.0
     assert p.AccentScaleY() == 0.0
     assert p.AccentAngularScale() == 0.0
-    assert p.LineThickness() == pytest.approx(0.01)
+    assert p.LineThickness() == _eq(0.01)
     assert p.RotationAngle() == 0.0
     assert p.AngularDivisions() == 0
     assert not p.IsCircular()
@@ -67,7 +72,7 @@ def test_Aspect_GridParamsTest_Bounds_RoundTrip():
     p.SetRadius(0.0)
     assert not p.IsBounded()
     p.SetZOffset(-0.01)
-    assert p.ZOffset() == pytest.approx(-0.01)
+    assert p.ZOffset() == _eq(-0.01)
     assert not p.IsBounded()
 
 
@@ -76,7 +81,7 @@ def test_Aspect_GridParamsTest_ArcRange_RoundTrip():
     assert not p.IsArc()
     p.SetArcRange(0.0, math.pi)
     assert p.AngleStart() == 0.0
-    assert p.AngleEnd() == pytest.approx(math.pi)
+    assert p.AngleEnd() == _eq(math.pi)
     assert p.IsArc()
     p.SetArcRange(1.0, 1.0)
     assert not p.IsArc()
@@ -104,19 +109,19 @@ def test_Aspect_GridParamsTest_AngularDivisions_ToggleCircular():
 def test_Aspect_GridParamsTest_EffectiveScaleY_FollowsScaleWhenZero():
     p = Aspect_GridParams()
     p.SetScale(0.25)
-    assert p.EffectiveScaleY() == pytest.approx(0.25)
+    assert p.EffectiveScaleY() == _eq(0.25)
     p.SetScaleY(0.5)
-    assert p.EffectiveScaleY() == pytest.approx(0.5)
+    assert p.EffectiveScaleY() == _eq(0.5)
     p.SetScaleY(0.0)
-    assert p.EffectiveScaleY() == pytest.approx(0.25)
+    assert p.EffectiveScaleY() == _eq(0.25)
 
 
 def test_Aspect_GridParamsTest_RotationAngle_RoundTrip():
     p = Aspect_GridParams()
     p.SetRotationAngle(0.5)
-    assert p.RotationAngle() == pytest.approx(0.5)
+    assert p.RotationAngle() == _eq(0.5)
     p.SetRotationAngle(-1.25)
-    assert p.RotationAngle() == pytest.approx(-1.25)
+    assert p.RotationAngle() == _eq(-1.25)
 
 
 def test_Aspect_GridParamsTest_Setters_RoundTrip():
@@ -132,20 +137,20 @@ def test_Aspect_GridParamsTest_Setters_RoundTrip():
     assert abs(p.Origin().Y() - 2.0) <= TOL
     assert abs(p.Origin().Z() - 3.0) <= TOL
     p.SetScale(0.5)
-    assert p.Scale() == pytest.approx(0.5)
+    assert p.Scale() == _eq(0.5)
     p.SetScaleY(0.75)
-    assert p.ScaleY() == pytest.approx(0.75)
-    assert p.EffectiveScaleY() == pytest.approx(0.75)
+    assert p.ScaleY() == _eq(0.75)
+    assert p.EffectiveScaleY() == _eq(0.75)
     p.SetAccentScaleX(0.05)
     p.SetAccentScaleY(0.1)
     p.SetAccentAngularScale(2.5)
-    assert p.AccentScaleX() == pytest.approx(0.05)
-    assert p.AccentScaleY() == pytest.approx(0.1)
-    assert p.AccentAngularScale() == pytest.approx(2.5)
+    assert p.AccentScaleX() == _eq(0.05)
+    assert p.AccentScaleY() == _eq(0.1)
+    assert p.AccentAngularScale() == _eq(2.5)
     p.SetLineThickness(0.02)
-    assert p.LineThickness() == pytest.approx(0.02)
+    assert p.LineThickness() == _eq(0.02)
     p.SetRotationAngle(0.123)
-    assert p.RotationAngle() == pytest.approx(0.123)
+    assert p.RotationAngle() == _eq(0.123)
     p.SetAngularDivisions(12)
     assert p.AngularDivisions() == 12
     assert p.IsCircular()
@@ -189,25 +194,25 @@ def test_Aspect_GridParamsTest_Copy_PreservesFields():
     assert abs(c.AccentColor().Red() - 0.7) <= TOL
     assert abs(c.AccentColor().Green() - 0.6) <= TOL
     assert abs(c.AccentColor().Blue() - 0.5) <= TOL
-    assert c.Scale() == pytest.approx(0.25)
-    assert c.ScaleY() == pytest.approx(0.125)
-    assert c.EffectiveScaleY() == pytest.approx(0.125)
-    assert c.AccentScaleX() == pytest.approx(0.025)
-    assert c.AccentScaleY() == pytest.approx(0.0125)
-    assert c.AccentAngularScale() == pytest.approx(3.0)
-    assert c.LineThickness() == pytest.approx(0.04)
-    assert c.RotationAngle() == pytest.approx(-0.5)
+    assert c.Scale() == _eq(0.25)
+    assert c.ScaleY() == _eq(0.125)
+    assert c.EffectiveScaleY() == _eq(0.125)
+    assert c.AccentScaleX() == _eq(0.025)
+    assert c.AccentScaleY() == _eq(0.0125)
+    assert c.AccentAngularScale() == _eq(3.0)
+    assert c.LineThickness() == _eq(0.04)
+    assert c.RotationAngle() == _eq(-0.5)
     assert c.AngularDivisions() == 16
     assert c.IsCircular()
     assert c.IsBackground()
     assert not c.IsDrawAxis()
     assert c.IsViewAdaptive()
-    assert c.SizeX() == pytest.approx(7.0)
-    assert c.SizeY() == pytest.approx(3.0)
-    assert c.Radius() == pytest.approx(2.0)
-    assert c.ZOffset() == pytest.approx(-0.002)
-    assert c.AngleStart() == pytest.approx(0.25)
-    assert c.AngleEnd() == pytest.approx(2.0)
+    assert c.SizeX() == _eq(7.0)
+    assert c.SizeY() == _eq(3.0)
+    assert c.Radius() == _eq(2.0)
+    assert c.ZOffset() == _eq(-0.002)
+    assert c.AngleStart() == _eq(0.25)
+    assert c.AngleEnd() == _eq(2.0)
     assert c.IsBounded()
     assert c.IsArc()
 

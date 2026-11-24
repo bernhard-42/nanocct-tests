@@ -13,6 +13,11 @@ from nanocct.Standard import Standard_ConstructionError, Standard_DomainError, S
 TOL = 1.0e-6
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def test_HelixGeomTest_HelixCurve_Derivatives():
     helix = HelixGeom_HelixCurve()
     helix.Load(0.0, 2.0 * math.pi, 5.0, 2.0, 0.0, True)
@@ -74,8 +79,8 @@ def test_HelixGeomTest_HelixCurve_AdaptorInterface():
 
     intervals = NCollection_Array1[float](1, 2)
     helix.Intervals(intervals, GeomAbs_C0)
-    assert intervals[1] == pytest.approx(0.0)
-    assert intervals[2] == pytest.approx(4.0 * math.pi)
+    assert intervals[1] == _eq(0.0)
+    assert intervals[2] == _eq(4.0 * math.pi)
 
     with pytest.raises(Standard_NotImplemented):
         helix.Resolution(1.0)

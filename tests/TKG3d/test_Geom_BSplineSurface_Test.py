@@ -9,6 +9,11 @@ from nanocct.gp import gp_Pnt, gp_Trsf, gp_Vec
 from nanocct.NCollection import NCollection_Array1, NCollection_Array2
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def _reals(*vals):
     a = NCollection_Array1[float](1, len(vals))
     for i, v in enumerate(vals):
@@ -94,10 +99,10 @@ def test_Geom_BSplineSurface_Test_CopyConstructorPoles(surf):
 def test_Geom_BSplineSurface_Test_CopyConstructorKnots(surf):
     c = Geom_BSplineSurface(surf)
     for i in range(1, surf.NbUKnots() + 1):
-        assert surf.UKnot(i) == pytest.approx(c.UKnot(i))
+        assert surf.UKnot(i) == _eq(c.UKnot(i))
         assert surf.UMultiplicity(i) == c.UMultiplicity(i)
     for i in range(1, surf.NbVKnots() + 1):
-        assert surf.VKnot(i) == pytest.approx(c.VKnot(i))
+        assert surf.VKnot(i) == _eq(c.VKnot(i))
         assert surf.VMultiplicity(i) == c.VMultiplicity(i)
 
 
@@ -160,10 +165,10 @@ def test_Geom_BSplineSurface_Test_Properties(surf):
 
 def test_Geom_BSplineSurface_Test_Bounds(surf):
     u1, u2, v1, v2 = surf.Bounds()
-    assert u1 == pytest.approx(0.0)
-    assert u2 == pytest.approx(1.0)
-    assert v1 == pytest.approx(0.0)
-    assert v2 == pytest.approx(1.0)
+    assert u1 == _eq(0.0)
+    assert u2 == _eq(1.0)
+    assert v1 == _eq(0.0)
+    assert v2 == _eq(1.0)
 
 
 def test_Geom_BSplineSurface_Test_SetPole(surf):
@@ -177,7 +182,7 @@ def test_Geom_BSplineSurface_Test_SetWeight():
     assert s.IsURational() or s.IsVRational()
     before = s.Value(0.5, 0.5)
     s.SetWeight(2, 2, 10.0)
-    assert s.Weight(2, 2) == pytest.approx(10.0)
+    assert s.Weight(2, 2) == _eq(10.0)
     after = s.Value(0.5, 0.5)
     assert after.Z() > before.Z()
 
@@ -280,8 +285,8 @@ def test_Geom_BSplineSurface_Test_Transform(surf):
 def test_Geom_BSplineSurface_Test_KnotsAccess(surf):
     uk = surf.UKnots()
     assert uk.Length() == 2
-    assert uk[1] == pytest.approx(0.0)
-    assert uk[2] == pytest.approx(1.0)
+    assert uk[1] == _eq(0.0)
+    assert uk[2] == _eq(1.0)
     assert surf.VKnots().Length() == 2
     um = surf.UMultiplicities()
     assert um.Length() == 2
@@ -321,7 +326,7 @@ def test_Geom_BSplineSurface_Test_RationalSurface():
     assert s.IsVRational()
     w = s.Weights()
     assert w is not None
-    assert w[2, 2] == pytest.approx(3.0)
+    assert w[2, 2] == _eq(3.0)
     mid = s.Value(0.5, 0.5)
     assert abs(mid.X() - 2.0) <= 0.1
     assert abs(mid.Y() - 2.0) <= 0.1
@@ -351,17 +356,17 @@ def test_Geom_BSplineSurface_Test_SetPoleCol(surf):
 def test_Geom_BSplineSurface_Test_SetWeightRow():
     s = _rational_bump(2.0)
     s.SetWeightRow(2, _reals(3.0, 4.0, 5.0))
-    assert s.Weight(2, 1) == pytest.approx(3.0)
-    assert s.Weight(2, 2) == pytest.approx(4.0)
-    assert s.Weight(2, 3) == pytest.approx(5.0)
+    assert s.Weight(2, 1) == _eq(3.0)
+    assert s.Weight(2, 2) == _eq(4.0)
+    assert s.Weight(2, 3) == _eq(5.0)
 
 
 def test_Geom_BSplineSurface_Test_SetWeightCol():
     s = _rational_bump(2.0)
     s.SetWeightCol(2, _reals(6.0, 7.0, 8.0))
-    assert s.Weight(1, 2) == pytest.approx(6.0)
-    assert s.Weight(2, 2) == pytest.approx(7.0)
-    assert s.Weight(3, 2) == pytest.approx(8.0)
+    assert s.Weight(1, 2) == _eq(6.0)
+    assert s.Weight(2, 2) == _eq(7.0)
+    assert s.Weight(3, 2) == _eq(8.0)
 
 
 def test_Geom_BSplineSurface_Test_RemoveVKnot(surf):
@@ -442,13 +447,13 @@ def test_Geom_BSplineSurface_Test_IncreaseUMultiplicity(surf):
 def test_Geom_BSplineSurface_Test_SetUKnot(surf):
     surf.InsertUKnot(0.5, 1, 0.0)
     surf.SetUKnot(2, 0.6)
-    assert surf.UKnot(2) == pytest.approx(0.6)
+    assert surf.UKnot(2) == _eq(0.6)
 
 
 def test_Geom_BSplineSurface_Test_SetVKnot(surf):
     surf.InsertVKnot(0.5, 1, 0.0)
     surf.SetVKnot(2, 0.6)
-    assert surf.VKnot(2) == pytest.approx(0.6)
+    assert surf.VKnot(2) == _eq(0.6)
 
 
 def test_Geom_BSplineSurface_Test_RationalSurface_UIso():
@@ -478,18 +483,21 @@ def test_Geom_BSplineSurface_Test_WeightsArray_NonRational_ReturnsUnitWeights(su
     # const& results by design (Design.md 6), so the copy always owns its data.
     for i in range(w.LowerRow(), w.UpperRow() + 1):
         for j in range(w.LowerCol(), w.UpperCol() + 1):
-            assert w[i, j] == pytest.approx(1.0)
+            assert w[i, j] == _eq(1.0)
 
 
 def test_Geom_BSplineSurface_Test_WeightsArray_Rational_ReturnsOwning():
+    # IsDeletable() and the address identity of the returned reference (&aWeights == &WeightsArray()) cannot be
+    # checked: the binding returns a copy of the const& result (R-RESULT), whose IsDeletable() is true whatever
+    # OCCT's array is, so only the values are checked.
     poles = _poles(3, 3, lambda i, j: (i, j, 0))
     weights = _weights(3, 3, lambda i, j: 2.0 if (i == 2 and j == 2) else 1.0)
     s = Geom_BSplineSurface(poles, weights, _reals(0, 1), _reals(0, 1), _ints(3, 3), _ints(3, 3), 2, 2)
     w = s.WeightsArray()
     assert w.ColLength() == 3
     assert w.RowLength() == 3
-    assert w[2, 2] == pytest.approx(2.0)
-    assert w[1, 1] == pytest.approx(1.0)
+    assert w[2, 2] == _eq(2.0)
+    assert w[1, 1] == _eq(1.0)
 
 
 def test_Geom_BSplineSurface_Test_OCC30990_CacheConsistencyAtKnots():

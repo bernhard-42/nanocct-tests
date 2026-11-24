@@ -527,8 +527,10 @@ def test_BRepGraph_ViewsTest_RefsView_GenericRefHelpers_RoundTripForTypedRef(gra
     gref = BRepGraph_RefId(ref)
     assert gen.ChildNode(gref) == BRepGraph_NodeId(entry.ChildFaceId)
     assert gen.LocalLocation(gref).IsIdentity()
-    # C++ compares TopAbs_Orientation with the ParityOrientation (implicit conversion)
-    assert (gen.Orientation(gref) == TopAbs.TopAbs_REVERSED) == entry.Orientation.IsReversed
+    # C++ compares TopAbs_Orientation with the ParityOrientation, through its implicit conversion operator, which
+    # has no Python spelling for an enum target (R-CONV): it is REVERSED if IsReversed, else FORWARD
+    expected = TopAbs.TopAbs_REVERSED if entry.Orientation.IsReversed else TopAbs.TopAbs_FORWARD
+    assert gen.Orientation(gref) == expected
     assert gen.Nb(BRepGraph_RefId.Kind.Face) == graph.Refs().Faces().Nb()
     assert gen.IsValid(gref)
     assert gen.IsActive(gref)

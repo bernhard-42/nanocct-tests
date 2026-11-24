@@ -3,11 +3,18 @@ from nanocct.OSD import OSD_Path, OSD_Process
 from nanocct.TCollection import TCollection_AsciiString
 
 
-def split(path):
-    folder = TCollection_AsciiString()
-    name = TCollection_AsciiString()
-    OSD_Path.FolderAndFileFromPath_s(path, folder, name)
-    return folder.ToCString(), name.ToCString()
+class Splitter:
+    """The C++ cases declare `TCollection_AsciiString aFolder, aFileName` once and pass them to every
+    FolderAndFileFromPath call, so a call overwrites the previous call's content (the Clear() branches of
+    OSD_Path.cxx); one Splitter per case keeps the two strings, as the C++ does."""
+
+    def __init__(self):
+        self.folder = TCollection_AsciiString()
+        self.name = TCollection_AsciiString()
+
+    def __call__(self, path):
+        OSD_Path.FolderAndFileFromPath_s(path, self.folder, self.name)
+        return self.folder.ToCString(), self.name.ToCString()
 
 
 def test_OSD_PathTest_DosAbsolutePaths():
@@ -82,29 +89,34 @@ def test_OSD_PathTest_RelativePaths():
 
 
 def test_OSD_PathTest_FolderAndFileFromPath_UnixPaths():
+    split = Splitter()
     assert split("/home/username/file.txt") == ("/home/username/", "file.txt")
     assert split("/file.txt") == ("/", "file.txt")
     assert split("/home/username/") == ("/home/username/", "")
 
 
 def test_OSD_PathTest_FolderAndFileFromPath_DosPaths():
+    split = Splitter()
     assert split("C:\\Users\\John\\document.txt") == ("C:\\Users\\John\\", "document.txt")
     assert split("C:\\file.txt") == ("C:\\", "file.txt")
     assert split("C:\\Program Files\\") == ("C:\\Program Files\\", "")
 
 
 def test_OSD_PathTest_FolderAndFileFromPath_RelativePaths():
+    split = Splitter()
     assert split("folder/subfolder/file.txt") == ("folder/subfolder/", "file.txt")
     assert split("../folder/file.txt") == ("../folder/", "file.txt")
     assert split("file.txt") == ("", "file.txt")
 
 
 def test_OSD_PathTest_FolderAndFileFromPath_ProtocolPaths():
+    split = Splitter()
     assert split("https://www.server.org/folder/file.gif") == ("https://www.server.org/folder/", "file.gif")
     assert split("content://path/file.jpg") == ("content://path/", "file.jpg")
 
 
 def test_OSD_PathTest_EdgeCases():
+    split = Splitter()
     assert split("") == ("", "")
     assert split("/") == ("/", "")
     assert split("\\") == ("\\", "")
@@ -112,6 +124,7 @@ def test_OSD_PathTest_EdgeCases():
 
 
 def test_OSD_PathTest_MixedSeparators():
+    split = Splitter()
     folder, name = split("C:/Users/John\\Documents/file.txt")
     assert folder != "" and name != ""
 

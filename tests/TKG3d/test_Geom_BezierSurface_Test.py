@@ -6,6 +6,11 @@ from nanocct.NCollection import NCollection_Array1, NCollection_Array2
 from nanocct.gp import gp_Pnt, gp_Trsf, gp_Vec
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def _row(*pts):
     a = NCollection_Array1[gp_Pnt](1, len(pts))
     for i, p in enumerate(pts, 1):
@@ -91,7 +96,7 @@ def test_Geom_BezierSurface_Test_RationalSurfaceCopyConstructor():
     assert cp.IsURational() or cp.IsVRational()
     for i in range(1, rs.NbUPoles() + 1):
         for j in range(1, rs.NbVPoles() + 1):
-            assert rs.Weight(i, j) == pytest.approx(cp.Weight(i, j))
+            assert rs.Weight(i, j) == _eq(cp.Weight(i, j))
 
 
 def test_Geom_BezierSurface_Test_CopyIndependence(surf):
@@ -143,10 +148,10 @@ def test_Geom_BezierSurface_Test_Properties(surf):
 
 def test_Geom_BezierSurface_Test_Bounds(surf):
     u1, u2, v1, v2 = surf.Bounds()
-    assert u1 == pytest.approx(0.0)
-    assert u2 == pytest.approx(1.0)
-    assert v1 == pytest.approx(0.0)
-    assert v2 == pytest.approx(1.0)
+    assert u1 == _eq(0.0)
+    assert u2 == _eq(1.0)
+    assert v1 == _eq(0.0)
+    assert v2 == _eq(1.0)
 
 
 def test_Geom_BezierSurface_Test_SetPole(surf):
@@ -159,7 +164,7 @@ def test_Geom_BezierSurface_Test_SetWeight():
     s = _rational2x2(1.0, 1.0, 1.0, 1.0)
     before = s.Value(0.5, 0.5)
     s.SetWeight(2, 2, 10.0)
-    assert s.Weight(2, 2) == pytest.approx(10.0)
+    assert s.Weight(2, 2) == _eq(10.0)
     assert s.IsURational() or s.IsVRational()
     assert not before.IsEqual(s.Value(0.5, 0.5), 1e-6)
 
@@ -344,23 +349,23 @@ def test_Geom_BezierSurface_Test_RationalIncrease():
 def test_Geom_BezierSurface_Test_SetWeightRow():
     s = _rational2x2(1.0, 2.0, 3.0, 4.0)
     s.SetWeightRow(1, _w1(5.0, 6.0))
-    assert s.Weight(1, 1) == pytest.approx(5.0)
-    assert s.Weight(1, 2) == pytest.approx(6.0)
+    assert s.Weight(1, 1) == _eq(5.0)
+    assert s.Weight(1, 2) == _eq(6.0)
 
 
 def test_Geom_BezierSurface_Test_SetWeightCol():
     s = _rational2x2(1.0, 2.0, 3.0, 4.0)
     s.SetWeightCol(1, _w1(7.0, 8.0))
-    assert s.Weight(1, 1) == pytest.approx(7.0)
-    assert s.Weight(2, 1) == pytest.approx(8.0)
+    assert s.Weight(1, 1) == _eq(7.0)
+    assert s.Weight(2, 1) == _eq(8.0)
 
 
 def test_Geom_BezierSurface_Test_InsertPoleRowAfterWithWeights():
     s = _rational2x2()
     s.InsertPoleRowAfter(1, _row((0, 0.5, 0), (1, 0.5, 0)), _w1(3.0, 4.0))
     assert s.NbUPoles() == 3
-    assert s.Weight(2, 1) == pytest.approx(3.0)
-    assert s.Weight(2, 2) == pytest.approx(4.0)
+    assert s.Weight(2, 1) == _eq(3.0)
+    assert s.Weight(2, 2) == _eq(4.0)
 
 
 def test_Geom_BezierSurface_Test_VIso_Rational():
@@ -376,15 +381,15 @@ def test_Geom_BezierSurface_Test_SetPoleWithWeight():
     new_pole = gp_Pnt(0.5, 0.5, 1.0)
     s.SetPole(1, 1, new_pole, 5.0)
     assert s.Pole(1, 1).IsEqual(new_pole, 1e-10)
-    assert s.Weight(1, 1) == pytest.approx(5.0)
+    assert s.Weight(1, 1) == _eq(5.0)
 
 
 def test_Geom_BezierSurface_Test_SetPoleColWithWeights():
     s = _rational2x2()
     s.SetPoleCol(2, _row((5, 0, 0), (5, 1, 0)), _w1(3.0, 4.0))
     assert s.Pole(1, 2).IsEqual(gp_Pnt(5, 0, 0), 1e-10)
-    assert s.Weight(1, 2) == pytest.approx(3.0)
-    assert s.Weight(2, 2) == pytest.approx(4.0)
+    assert s.Weight(1, 2) == _eq(3.0)
+    assert s.Weight(2, 2) == _eq(4.0)
 
 
 def test_Geom_BezierSurface_Test_WeightsArray_NonRational_ReturnsUnitWeights(surf):
@@ -397,13 +402,15 @@ def test_Geom_BezierSurface_Test_WeightsArray_NonRational_ReturnsUnitWeights(sur
     assert w.RowLength() == surf.NbVPoles()
     for i in range(w.LowerRow(), w.UpperRow() + 1):
         for j in range(w.LowerCol(), w.UpperCol() + 1):
-            assert w[i, j] == pytest.approx(1.0)
+            assert w[i, j] == _eq(1.0)
 
 
 def test_Geom_BezierSurface_Test_WeightsArray_Rational_ReturnsOwning():
+    # IsDeletable() and the address identity of the returned reference (&aWeights == &WeightsArray()) cannot be
+    # checked: the binding returns a copy of the const& result (R-RESULT), whose IsDeletable() is true whatever
+    # OCCT's array is, so only the values are checked.
     s = _rational2x2(1.0, 2.0, 1.0, 1.0)
     w = s.WeightsArray()
     assert w.Size() == 4
-    assert w.IsDeletable()
-    assert w[1, 2] == pytest.approx(2.0)
-    assert w[1, 1] == pytest.approx(1.0)
+    assert w[1, 2] == _eq(2.0)
+    assert w[1, 1] == _eq(1.0)

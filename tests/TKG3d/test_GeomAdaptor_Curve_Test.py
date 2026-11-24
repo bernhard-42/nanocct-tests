@@ -14,7 +14,8 @@ TOL = Precision.Confusion_s()
 
 
 def deq(a, b):
-    assert a == pytest.approx(b, rel=1e-14, abs=1e-300)
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    assert a == pytest.approx(b, rel=1e-15, abs=1e-300)
 
 
 @pytest.fixture

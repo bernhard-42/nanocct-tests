@@ -10,6 +10,11 @@ from nanocct.NCollection import NCollection_Array1
 from nanocct.Precision import Precision
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def _pnts(*pts):
     a = NCollection_Array1[gp_Pnt](1, len(pts))
     for i, p in enumerate(pts):
@@ -68,7 +73,7 @@ def test_Geom_BSplineCurve_Test_CopyConstructorPoles(curve):
 def test_Geom_BSplineCurve_Test_CopyConstructorKnots(curve):
     c = Geom_BSplineCurve(curve)
     for i in range(1, curve.NbKnots() + 1):
-        assert curve.Knot(i) == pytest.approx(c.Knot(i))
+        assert curve.Knot(i) == _eq(c.Knot(i))
         assert curve.Multiplicity(i) == c.Multiplicity(i)
 
 
@@ -86,7 +91,7 @@ def test_Geom_BSplineCurve_Test_RationalCurveCopyConstructor():
     c = Geom_BSplineCurve(r)
     assert c.IsRational()
     for i in range(1, r.NbPoles() + 1):
-        assert r.Weight(i) == pytest.approx(c.Weight(i))
+        assert r.Weight(i) == _eq(c.Weight(i))
 
 
 def test_Geom_BSplineCurve_Test_Evaluation_D0(curve):
@@ -140,7 +145,7 @@ def test_Geom_BSplineCurve_Test_SetWeight():
     c = _rational_parabola(1.0)
     before = c.Value(0.5)
     c.SetWeight(2, 5.0)
-    assert c.Weight(2) == pytest.approx(5.0)
+    assert c.Weight(2) == _eq(5.0)
     assert c.IsRational()
     after = c.Value(0.5)
     assert not before.IsEqual(after, 1e-6)
@@ -244,8 +249,8 @@ def test_Geom_BSplineCurve_Test_IncreaseMultiplicity(curve):
 
 
 def test_Geom_BSplineCurve_Test_KnotAccess(curve):
-    assert curve.Knot(1) == pytest.approx(0.0)
-    assert curve.Knot(2) == pytest.approx(1.0)
+    assert curve.Knot(1) == _eq(0.0)
+    assert curve.Knot(2) == _eq(1.0)
     assert curve.FirstUKnotIndex() == 1
     assert curve.LastUKnotIndex() == 2
     assert curve.Knots().Length() == 2
@@ -270,7 +275,7 @@ def test_Geom_BSplineCurve_Test_WeightsAccess_Rational():
     c = _rational_parabola(2.0)
     w = c.Weights()
     assert w is not None
-    assert w[2] == pytest.approx(2.0)
+    assert w[2] == _eq(2.0)
 
 
 def test_Geom_BSplineCurve_Test_LocalEvaluation(curve):
@@ -283,7 +288,7 @@ def test_Geom_BSplineCurve_Test_SetKnot():
     poles = _pnts((0, 0, 0), (1, 1, 0), (2, 0, 0), (3, 1, 0))
     c = Geom_BSplineCurve(poles, _reals(0.0, 0.5, 1.0), _ints(3, 1, 3), 2)
     c.SetKnot(2, 0.6)
-    assert c.Knot(2) == pytest.approx(0.6)
+    assert c.Knot(2) == _eq(0.6)
 
 
 def test_Geom_BSplineCurve_Test_CopyIndependence(curve):
@@ -375,21 +380,24 @@ def test_Geom_BSplineCurve_Test_WeightsArray_NonRational_ReturnsUnitWeights(curv
     w = curve.WeightsArray()
     assert w.Length() == curve.NbPoles()
     for i in range(1, w.Length() + 1):
-        assert w[i] == pytest.approx(1.0)
+        assert w[i] == _eq(1.0)
     # IsDeletable() and the reference-identity check (&aWeights == &WeightsArray()) are C++ memory
     # semantics: nanocct copies const& results by design (Design.md 6), so the copy always owns its data.
 
 
 def test_Geom_BSplineCurve_Test_WeightsArray_Rational_ReturnsOwning():
+    # IsDeletable() and the address identity of the returned reference (&aWeights == &WeightsArray()) cannot be
+    # checked: the binding returns a copy of the const& result (R-RESULT), whose IsDeletable() is true whatever
+    # OCCT's array is, so only the values are checked.
     poles = _pnts((0, 0, 0), (1, 1, 0), (2, 1, 0), (3, 0, 0))
     c = Geom_BSplineCurve(poles, _reals(1.0, 2.0, 3.0, 1.0), _reals(0.0, 1.0), _ints(4, 4), 3)
     assert c.IsRational()
     w = c.WeightsArray()
     assert w.Length() == 4
-    assert w[1] == pytest.approx(1.0)
-    assert w[2] == pytest.approx(2.0)
-    assert w[3] == pytest.approx(3.0)
-    assert w[4] == pytest.approx(1.0)
+    assert w[1] == _eq(1.0)
+    assert w[2] == _eq(2.0)
+    assert w[3] == _eq(3.0)
+    assert w[4] == _eq(1.0)
 
 
 def test_Geom_BSplineCurveTest_IsG1TranslatedPeriodicIntervalsAndSeam():

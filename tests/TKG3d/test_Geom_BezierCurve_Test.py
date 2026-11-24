@@ -11,6 +11,11 @@ from nanocct.Standard import Standard_ConstructionError, Standard_Failure
 from nanocct.gp import gp_Pnt, gp_Trsf, gp_Vec
 
 
+def _eq(value):
+    # EXPECT_DOUBLE_EQ: equal within a few ULP
+    return pytest.approx(value, rel=1e-15, abs=1e-300)
+
+
 def _poles(*pts):
     a = NCollection_Array1[gp_Pnt](1, len(pts))
     for i, p in enumerate(pts, 1):
@@ -66,7 +71,7 @@ def test_Geom_BezierCurve_Test_RationalCurveCopyConstructor():
     cp = Geom_BezierCurve(rc)
     assert cp.IsRational()
     for i in range(1, rc.NbPoles() + 1):
-        assert rc.Weight(i) == pytest.approx(cp.Weight(i))
+        assert rc.Weight(i) == _eq(cp.Weight(i))
 
 
 def test_Geom_BezierCurve_Test_CopyIndependence(curve):
@@ -122,8 +127,8 @@ def test_Geom_BezierCurve_Test_Properties(curve):
     assert not curve.IsClosed()
     assert curve.IsCN(100)
     assert curve.Continuity() == GeomAbs_Shape.GeomAbs_CN
-    assert curve.FirstParameter() == pytest.approx(0.0)
-    assert curve.LastParameter() == pytest.approx(1.0)
+    assert curve.FirstParameter() == _eq(0.0)
+    assert curve.LastParameter() == _eq(1.0)
 
 
 def test_Geom_BezierCurve_Test_SetPole(curve):
@@ -138,7 +143,7 @@ def test_Geom_BezierCurve_Test_SetWeight():
     c = _quad_rational(1.0)
     mid_before = c.Value(0.5)
     c.SetWeight(2, 10.0)
-    assert c.Weight(2) == pytest.approx(10.0)
+    assert c.Weight(2) == _eq(10.0)
     assert c.IsRational()
     assert c.Value(0.5).Y() > mid_before.Y()
 
@@ -234,7 +239,7 @@ def test_Geom_BezierCurve_Test_SetPoleWithWeight():
     new_pole = gp_Pnt(1, 2, 0)
     c.SetPole(2, new_pole, 5.0)
     assert c.Pole(2).IsEqual(new_pole, 1e-10)
-    assert c.Weight(2) == pytest.approx(5.0)
+    assert c.Weight(2) == _eq(5.0)
     assert c.IsRational()
 
 
@@ -242,7 +247,7 @@ def test_Geom_BezierCurve_Test_InsertPoleAfterWithWeight():
     c = _quad_rational(2.0)
     c.InsertPoleAfter(2, gp_Pnt(1.5, 0.5, 0), 3.0)
     assert c.NbPoles() == 4
-    assert c.Weight(3) == pytest.approx(3.0)
+    assert c.Weight(3) == _eq(3.0)
     assert c.IsRational()
 
 
@@ -275,13 +280,13 @@ def test_Geom_BezierCurve_Test_RationalReverse():
     c.Reverse()
     assert c.StartPoint().IsEqual(end, 1e-10)
     assert c.EndPoint().IsEqual(start, 1e-10)
-    assert c.Weight(1) == pytest.approx(2.0)
-    assert c.Weight(3) == pytest.approx(1.0)
+    assert c.Weight(1) == _eq(2.0)
+    assert c.Weight(3) == _eq(1.0)
 
 
 def test_Geom_BezierCurve_Test_ReversedParameter(curve):
-    assert curve.ReversedParameter(0.3) == pytest.approx(0.7)
-    assert curve.ReversedParameter(0.0) == pytest.approx(1.0)
+    assert curve.ReversedParameter(0.3) == _eq(0.7)
+    assert curve.ReversedParameter(0.0) == _eq(1.0)
 
 
 def test_Geom_BezierCurve_Test_LinearCurve():
@@ -300,18 +305,20 @@ def test_Geom_BezierCurve_Test_WeightsArray_NonRational_ReturnsUnitWeights(curve
     w = curve.WeightsArray()
     assert w.Length() == curve.NbPoles()
     for i in range(1, w.Length() + 1):
-        assert w[i] == pytest.approx(1.0)
+        assert w[i] == _eq(1.0)
 
 
 def test_Geom_BezierCurve_Test_WeightsArray_Rational_ReturnsOwning():
+    # IsDeletable() and the address identity of the returned reference (&aWeights == &WeightsArray()) cannot be
+    # checked: the binding returns a copy of the const& result (R-RESULT), whose IsDeletable() is true whatever
+    # OCCT's array is, so only the values are checked.
     c = _quad_rational(2.0)
     assert c.IsRational()
     w = c.WeightsArray()
     assert w.Length() == 3
-    assert w.IsDeletable()
-    assert w[1] == pytest.approx(1.0)
-    assert w[2] == pytest.approx(2.0)
-    assert w[3] == pytest.approx(1.0)
+    assert w[1] == _eq(1.0)
+    assert w[2] == _eq(2.0)
+    assert w[3] == _eq(1.0)
 
 
 def test_Geom_BezierCurveTest_OCC2569_DegreeEqualsNbPolesMinusOne():
