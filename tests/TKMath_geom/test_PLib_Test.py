@@ -143,10 +143,10 @@ def test_PLibTest_BinomialCoefficient_SumProperty():
         assert abs(s - 2.0**n) <= CONF
 
 
-# test_PLibTest_EvalPolynomial: not translatable -- nanocct omits the array-by-first-element overloads (Design.md 2d)
+# test_PLibTest_EvalPolynomial: not translatable -- nanocct omits the array-by-first-element overloads (nanocct docs/Excluded.md, the PLib row; overrides.toml [skip] methods)
 
 
-# test_PLibTest_EvalPolynomialWithDerivatives: not translatable -- nanocct omits the array-by-first-element overloads (Design.md 2d)
+# test_PLibTest_EvalPolynomialWithDerivatives: not translatable -- nanocct omits the array-by-first-element overloads (nanocct docs/Excluded.md, the PLib row; overrides.toml [skip] methods)
 
 
 def test_PLibTest_ConstraintOrderConversion():

@@ -124,9 +124,7 @@ def test_BRepGraph_ReverseIteratorTest_RangeFor_WorksCorrectly(graph):
 
 
 def test_BRepGraph_ReverseIteratorTest_RefsShellsOfFace_ReturnsValidRefId(graph):
-    rel = graph.Topo().Faces().Relations(BRepGraph_FaceId(0))
-    refs = rel.ParentFaceRefIds
-    it = BRepGraph_RefsShellsOfFace(graph, refs)
+    it = BRepGraph_RefsShellsOfFace(graph, graph.Topo().Faces().Relations(BRepGraph_FaceId(0)).ParentFaceRefIds)
     assert it.More()
     assert it.CurrentParentId() == BRepGraph_ShellId(0)
     assert it.CurrentRefId().IsValid()
@@ -135,9 +133,7 @@ def test_BRepGraph_ReverseIteratorTest_RefsShellsOfFace_ReturnsValidRefId(graph)
 def test_BRepGraph_ReverseIteratorTest_RefsEdgesOfVertex_ReturnsValidRefId(graph):
     vertex = BRepGraph_VertexId(0)
     n = 0
-    # Keep the edge vector alive: the Python binding returns a copy that the iterator only references.
-    edges = graph.Topo().Vertices().Edges(vertex)
-    it = BRepGraph_RefsEdgesOfVertex(graph, edges, vertex)
+    it = BRepGraph_RefsEdgesOfVertex(graph, graph.Topo().Vertices().Edges(vertex), vertex)
     while it.More():
         assert it.CurrentParentId().IsValid(graph.Topo().Edges().Nb())
         assert it.CurrentRefId().IsValid()
@@ -147,8 +143,7 @@ def test_BRepGraph_ReverseIteratorTest_RefsEdgesOfVertex_ReturnsValidRefId(graph
 
 
 def test_BRepGraph_ReverseIteratorTest_CoEdgesOfEdge_BoxEdgeHasCoEdges(graph):
-    coedges = graph.Topo().Edges().CoEdges(BRepGraph_EdgeId(0))  # held: iterator references it
-    assert _count(BRepGraph_CoEdgesOfEdge(graph, coedges)) == 2
+    assert _count(BRepGraph_CoEdgesOfEdge(graph, graph.Topo().Edges().CoEdges(BRepGraph_EdgeId(0)))) == 2
 
 
 def test_BRepGraph_ReverseIteratorTest_WiresOfCoEdge_BoxCoEdgeBelongsToOneWire(graph):
@@ -164,8 +159,7 @@ def test_BRepGraph_ReverseIteratorTest_Definition_ReturnsFaceDefinition(graph):
 
 
 def test_BRepGraph_ReverseIteratorTest_Definition_ReturnsEdgeDefinition(graph):
-    edges = graph.Topo().Vertices().Edges(BRepGraph_VertexId(0))
-    it = BRepGraph_EdgesOfVertex(graph, edges)
+    it = BRepGraph_EdgesOfVertex(graph, graph.Topo().Vertices().Edges(BRepGraph_VertexId(0)))
     assert it.More()
     edge_def = it.Definition()
     assert not it.CurrentId().IsRemoved(graph)
@@ -201,7 +195,6 @@ def test_BRepGraph_ReverseIteratorTest_StartingIndex_SkipsToPosition(graph):
 
 
 def _expect_single_parent_of(cls, g, refs, expected):
-    # refs must stay referenced while iterating (the iterator does not keep it alive)
     it = cls(g, refs)
     assert it.More()
     assert it.CurrentId() == expected
@@ -253,8 +246,7 @@ def test_BRepGraph_ReverseIteratorTest_CompoundsOfChild_AllTopologyKinds(graph):
     _expect_single_parent_of(BRepGraph_CompoundsOfFace, g, gen.CompoundRefIds(BRepGraph_NodeId(face)), compound)
     _expect_single_parent_of(BRepGraph_CompoundsOfShell, g, gen.CompoundRefIds(BRepGraph_NodeId(shell)), compound)
 
-    solid_refs = gen.CompoundRefIds(BRepGraph_NodeId(solid))
-    solid_parents = BRepGraph_CompoundsOfSolid(g, solid_refs)
+    solid_parents = BRepGraph_CompoundsOfSolid(g, gen.CompoundRefIds(BRepGraph_NodeId(solid)))
     assert solid_parents.More()
     assert solid_parents.CurrentId() == nested
     solid_parents.Next()

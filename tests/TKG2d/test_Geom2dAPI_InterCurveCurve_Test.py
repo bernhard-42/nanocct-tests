@@ -8,9 +8,10 @@ from nanocct.Precision import Precision
 
 
 
-# Geom2dAPI_InterCurveCurve::Intersector() returns const Geom2dInt_GInter&; the binding returns a copy, and OCCT's
-# IntRes2d_Intersection copy constructor resets done = false (IntRes2d_Intersection.lxx:32-37), so Point(1) on the
-# copy raises StdFail_NotDone where the C++ reference works.
+# Geom2dAPI_InterCurveCurve::Intersector() returns const Geom2dInt_GInter&. OCCT's IntRes2d_Intersection copy
+# constructor resets done = false (IntRes2d_Intersection.lxx:32-37), so Geom2dInt_GInter is listed in nanocct's
+# overrides.toml [not_value_copy] and the binding returns the live object by reference, not a copy (nanocct
+# docs/Binding-Rules.md R-RESULT): Point(1) on it works as on the C++ reference.
 def test_Geom2dAPI_InterCurveCurve_Test_OCC24889_IntersectionParameterWithinLimits():
     c1 = Geom2d_Circle(gp_Ax22d(gp_Pnt2d(25, -25), gp_Dir2d(gp_Dir2d.D.X), gp_Dir2d(-0.0, 1)), 155)
     c2 = Geom2d_Circle(gp_Ax22d(gp_Pnt2d(25, 25), gp_Dir2d(gp_Dir2d.D.X), gp_Dir2d(-0.0, 1)), 155)

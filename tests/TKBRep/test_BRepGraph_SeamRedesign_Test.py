@@ -37,10 +37,7 @@ def _ids(it):
 
 def _find_seam_coedge(g):
     for eid in _ids(BRepGraph_EdgeIterator(g)):
-        # Keep the vector alive in a name: CoEdges() returns a copy in Python and the
-        # iterator only stores a pointer to it (a temporary here dangles, see report).
-        parents = g.Topo().Edges().CoEdges(eid)
-        for ceid in _ids(BRepGraph_CoEdgesOfEdge(g, parents)):
+        for ceid in _ids(BRepGraph_CoEdgesOfEdge(g, g.Topo().Edges().CoEdges(eid))):
             if BRepGraph_Tool.CoEdge.IsSeam_s(g, ceid):
                 return ceid
     return BRepGraph_CoEdgeId()

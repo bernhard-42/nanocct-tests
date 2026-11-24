@@ -113,10 +113,10 @@ def test_PLibJacobiPolynomialTest_CoefficientConversion():
     finite(co)
 
 
-# test_PLibJacobiPolynomialTest_DegreeReduction: not translatable -- nanocct omits the array-by-first-element overloads (Design.md 2d)
+# test_PLibJacobiPolynomialTest_DegreeReduction: not translatable -- nanocct omits the array-by-first-element overloads (nanocct docs/Excluded.md, the PLib row; overrides.toml [skip] methods)
 
 
-# test_PLibJacobiPolynomialTest_ErrorEstimation: not translatable -- nanocct omits the array-by-first-element overloads (Design.md 2d)
+# test_PLibJacobiPolynomialTest_ErrorEstimation: not translatable -- nanocct omits the array-by-first-element overloads (nanocct docs/Excluded.md, the PLib row; overrides.toml [skip] methods)
 
 
 def test_PLibJacobiPolynomialTest_StressTests():

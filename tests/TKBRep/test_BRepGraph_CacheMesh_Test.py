@@ -7,7 +7,10 @@
 #   .HasPolygonOnSurface / .HasPolygonOnTriangulation, which check the fresh cache entry first and then the
 #   persistent coedge reps; a plain box has no persistent coedge mesh (asserted as a precondition).
 # - Mutations through a MutGuard scope map to the by-id Editor setters (same markModified path).
-# - Not translated: Needs_* (CacheMesh::Needs not bound), MeshGeneration_MonotonicAcrossClear (raw internals).
+# - Not translated: Needs_* (CacheMesh::Needs not bound), MeshGeneration_MonotonicAcrossClear (it reads
+#   FaceMeshEntry::MeshGeneration and CoEdgeMeshEntry::FaceMeshGeneration through CacheMesh::findFaceEntryRaw /
+#   findCoEdgeEntryRaw; BRepGraph_CacheMesh and its entry structs are not bound, so neither are the
+#   Mesh().Cache() accessors that return those entries).
 
 import pytest
 

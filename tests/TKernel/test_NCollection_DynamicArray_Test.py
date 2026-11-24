@@ -1,6 +1,6 @@
 # Translated from OCCT src/FoundationClasses/TKernel/GTests/NCollection_DynamicArray_Test.cxx (LGPL-2.1 with the OCCT exception)
 #
-# Not translated: move semantics, custom allocators, STL algorithms / C++ iterator lifetime across appends,
+# Not translated: move semantics, STL algorithms / C++ iterator lifetime across appends,
 # EmplaceAppend/EmplaceValue (not bound; custom struct element types), the int-vs-size_t overload tests
 # (Python sees one overload). ChangeValue/ChangeFirst/ChangeLast of a scalar element are not bound and
 # NCollection_DynamicArray<int>::Iterator is not exposed: writes go through d[i] / SetValue, iteration
@@ -8,7 +8,7 @@
 
 import pytest
 
-from nanocct.NCollection import NCollection_DynamicArray
+from nanocct.NCollection import NCollection_BaseAllocator, NCollection_DynamicArray
 from nanocct.Standard import Standard_OutOfRange
 
 DA = NCollection_DynamicArray[int]
@@ -176,6 +176,20 @@ def test_NCollection_DynamicArrayTest_Appended():
     assert v(1) == 20
     v[0] = 15
     assert v(0) == 15
+
+
+def test_NCollection_DynamicArrayTest_CustomAllocator():
+    an_alloc = NCollection_BaseAllocator.CommonBaseAllocator_s()
+    v = DA(256, an_alloc)
+    v.Append(10)
+    v.Append(20)
+    v.Append(30)
+    assert v.Length() == 3
+    assert v(0) == 10
+    assert v(1) == 20
+    assert v(2) == 30
+    v.Clear()
+    assert v.Length() == 0
 
 
 def test_NCollection_DynamicArrayTest_SetIncrement():

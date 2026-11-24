@@ -2,9 +2,10 @@
 #
 # Mapping notes: Python str -> const char* (UTF-8), a one-character str also serves the char overloads.
 # ToCString() returns a Python copy, so the "pointer into self" tests below check the results, not the aliasing.
-# Skipped: MemoryAllocation, PaddingSafety (allocation / null terminator), AssignmentOperator and
-# TemplateLiteral_Assignment (C++ operator=), StringView_* (std::string_view), MoveConstructor, MoveAssignment,
-# the wchar_t parts of AssignCat_/Cat_ExtendedStringAndWideChar.
+# Skipped: AssignmentOperator and TemplateLiteral_Assignment (C++ operator=), StringView_* (std::string_view),
+# MoveConstructor, MoveAssignment, the wchar_t parts of AssignCat_/Cat_ExtendedStringAndWideChar, and the
+# null-termination check of PaddingSafety (aCString[anIdx] == '\0'): ToCString() returns a Python str of
+# Length() characters, which does not hold the terminating '\0' byte.
 
 from nanocct.TCollection import (
     TCollection_AsciiString,
@@ -185,6 +186,15 @@ def test_TCollection_AsciiStringTest_Split():
     assert remainder.ToCString() == "fghij"
 
 
+def test_TCollection_AsciiStringTest_MemoryAllocation():
+    aString1 = TCollection_AsciiString("test")
+    assert aString1.Length() == 4
+
+    for anIdx in range(21):
+        aStr = TCollection_AsciiString(anIdx, "A")
+        assert aStr.Length() == anIdx
+
+
 def test_TCollection_AsciiStringTest_LengthConstructor():
     aSourceString = "This is a very long string"
 
@@ -256,6 +266,17 @@ def test_TCollection_AsciiStringTest_LargeStrings():
     assert aLargeString.Length() == aLargeSize
     assert aLargeString.Value(1) == "X"
     assert aLargeString.Value(aLargeSize) == "X"
+
+
+def test_TCollection_AsciiStringTest_PaddingSafety():
+    # the null-termination check is not translated (header note)
+    for anIdx in range(1, 17):
+        aTestString = TCollection_AsciiString(anIdx, "A")
+        assert aTestString.Length() == anIdx
+
+        aCString = aTestString.ToCString()
+        for aCharIdx in range(anIdx):
+            assert aCString[aCharIdx] == "A"
 
 
 def test_TCollection_AsciiStringTest_AssignCat_BasicCases():

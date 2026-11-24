@@ -480,7 +480,7 @@ def test_Geom_BSplineSurface_Test_WeightsArray_NonRational_ReturnsUnitWeights(su
     assert w.ColLength() == surf.NbUPoles()
     assert w.RowLength() == surf.NbVPoles()
     # IsDeletable() and the reference-identity check are C++ memory semantics: nanocct copies
-    # const& results by design (Design.md 6), so the copy always owns its data.
+    # const& results by design (nanocct docs/Binding-Rules.md R-RESULT), so the copy always owns its data.
     for i in range(w.LowerRow(), w.UpperRow() + 1):
         for j in range(w.LowerCol(), w.UpperCol() + 1):
             assert w[i, j] == _eq(1.0)

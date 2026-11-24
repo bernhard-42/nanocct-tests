@@ -382,7 +382,8 @@ def test_Geom_BSplineCurve_Test_WeightsArray_NonRational_ReturnsUnitWeights(curv
     for i in range(1, w.Length() + 1):
         assert w[i] == _eq(1.0)
     # IsDeletable() and the reference-identity check (&aWeights == &WeightsArray()) are C++ memory
-    # semantics: nanocct copies const& results by design (Design.md 6), so the copy always owns its data.
+    # semantics: nanocct copies const& results by design (nanocct docs/Binding-Rules.md R-RESULT), so the
+    # copy always owns its data.
 
 
 def test_Geom_BSplineCurve_Test_WeightsArray_Rational_ReturnsOwning():

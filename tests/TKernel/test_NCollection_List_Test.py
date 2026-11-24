@@ -1,8 +1,9 @@
 # Translated from OCCT src/FoundationClasses/TKernel/GTests/NCollection_List_Test.cxx (LGPL-2.1 with the OCCT exception)
-# Not translated: STL algorithm tests, allocator tests (OCC25348, custom allocators), Emplace* (not bound,
-# custom C++ element types), initializer lists, move constructor/assignment, const iterators.
+# Not translated: STL algorithm tests, Emplace* (not bound, custom C++ element types), initializer lists
+# (InitializerListConstructor, InitializerListConstructorEmpty, InitializerListWithCustomAllocator), move
+# constructor/assignment, const iterators.
 
-from nanocct.NCollection import NCollection_List
+from nanocct.NCollection import NCollection_IncAllocator, NCollection_List
 
 ListInt = NCollection_List[int]
 
@@ -195,6 +196,23 @@ def test_NCollection_ListTest_Reverse():
     assert iter_values(a_list) == [30, 20, 10]
 
 
+def test_NCollection_ListTest_OCC25348_AssignDoesNotChangeAllocator():
+    # Bug OCC25348: Assign() must not change the target's own allocator. EXPECT_EQ on the handles compares the
+    # pointers: `is`, since a handle result is the Transient's own Python object.
+    an_alloc1 = NCollection_IncAllocator()
+    a_list1 = ListInt(an_alloc1)
+    for i in range(10):
+        an_alloc2 = NCollection_IncAllocator()
+        a_list2 = ListInt(an_alloc2)
+        a_list2.Append(i)
+        an_alloc_before = a_list1.Allocator()
+        a_list1.Assign(a_list2)
+        an_alloc_after = a_list1.Allocator()
+        assert an_alloc_before is an_alloc_after
+        assert a_list1.Size() == 1
+        assert a_list1.First() == i
+
+
 def test_NCollection_ListTest_Exchange():
     a_list1 = make(10, 20)
     a_list2 = make(30, 40, 50)
@@ -215,3 +233,27 @@ def test_NCollection_ListTest_ExchangeWithEmpty():
     assert a_list2.Size() == 2
     assert a_list2.First() == 10
     assert a_list2.Last() == 20
+
+
+def test_NCollection_ListTest_ExchangeWithDifferentAllocators():
+    an_alloc1 = NCollection_IncAllocator()
+    an_alloc2 = NCollection_IncAllocator()
+    a_list1 = ListInt(an_alloc1)
+    a_list1.Append(10)
+    a_list1.Append(20)
+    a_list2 = ListInt(an_alloc2)
+    a_list2.Append(30)
+    a_list2.Append(40)
+    a_list2.Append(50)
+    an_orig_alloc1 = a_list1.Allocator()
+    an_orig_alloc2 = a_list2.Allocator()
+    a_list1.Exchange(a_list2)
+    assert a_list1.Size() == 3
+    assert a_list1.First() == 30
+    assert a_list1.Last() == 50
+    assert a_list2.Size() == 2
+    assert a_list2.First() == 10
+    assert a_list2.Last() == 20
+    # the nodes stay with their allocator, so the allocators are exchanged too
+    assert a_list1.Allocator() is an_orig_alloc2
+    assert a_list2.Allocator() is an_orig_alloc1

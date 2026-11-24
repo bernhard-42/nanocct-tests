@@ -141,8 +141,6 @@ def _child_refs_of_compound(g, compound_id):
 
 
 def _parents(iterator_cls, g, refs):
-    # Keep `refs` alive while iterating: the reverse iterators store a pointer to the ref vector,
-    # and a vector returned from Python is a copy (see the report: passing a temporary crashes).
     return list(iterator_cls(g, refs))
 
 
