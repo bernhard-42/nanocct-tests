@@ -70,7 +70,7 @@ C++ GTest files of OCCT 8.0.2 that have no Python port here, each with the reaso
 | `src/FoundationClasses/TKernel/GTests/Standard_ArrayStreamBuffer_Test.cxx` | 20 | not bound: its base `std::streambuf` and the raw char buffer |
 | `src/FoundationClasses/TKernel/GTests/Standard_Atomic_Test.cxx` | 1 | `std::atomic` under `OSD_Parallel::For` |
 | `src/FoundationClasses/TKernel/GTests/Standard_Handle_Test.cxx` | 1 | the C++ `occ::handle` template (a null handle is `None` in Python) |
-| `src/FoundationClasses/TKernel/GTests/Standard_Strtod_Test.cxx` | 4 | 3 cases: `OSD_Parallel::For` with lambdas; **pending: `Strtod` is not bound, because the generator skips declarations inside `extern "C" { }`** |
+| `src/FoundationClasses/TKernel/GTests/Standard_Strtod_Test.cxx` | 4 | 3 cases: `OSD_Parallel::For` with lambdas; the fourth needs `Strtod(const char*, char**)`, whose `char**` out pointer is a raw pointer nanocct does not bind (R-UNSUPPORTED; `Atof` from the same `extern "C"` block is bound) |
 | `src/FoundationClasses/TKernel/GTests/TopLoc_Location_Test.cxx` | 1 | `OSD_Parallel::For` with a functor and `std::atomic` |
 | `src/ModelingAlgorithms/TKBO/GTests/BRepAlgoAPI_BuilderAlgo_Test.cxx` | 10 | compile-time type traits (`std::is_copy_constructible` and the like) |
 | `src/ModelingAlgorithms/TKExpress/GTests/Expr_GeneralExpression_Test.cxx` | 3 | TKExpress is out of scope (nanocct docs/Design.md) |
