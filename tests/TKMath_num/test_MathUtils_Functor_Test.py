@@ -1,4 +1,12 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/MathUtils_Functor_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: C++ function and class templates on a C++ callable or functor type (template in namespace, not bound;
+# docs/Excluded.md "functor-template algorithms"):
+# - ScalarLambda_Value, ScalarLambdaWithDerivative_Values, VectorLambda_Value, VectorLambdaWithGradient_Values:
+#   MakeScalar/MakeScalarWithDerivative/MakeVector/MakeVectorWithGradient<Lambda> wrap a C++ lambda.
+# - Composite_Value, Sum_Value, Difference_Value, Product_Value, Quotient_Value, Scaled_Value, Shifted_Value,
+#   Negated_Value: MakeComposite/MakeSum/.../MakeNegated build Composite<F, G>, Sum<F, G>, ... from the functor types.
+# - Polynomial_WithRoots, Polynomial_WithNewton and all MathUtils_Functor_Integration cases: MathRoot::Brent/Newton<F>
+#   and MathOpt::Powell/BFGS<F> take the functor type as a template parameter.
 import math
 
 from nanocct import MathUtils

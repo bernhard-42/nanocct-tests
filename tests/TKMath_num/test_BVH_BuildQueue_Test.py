@@ -1,5 +1,8 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/BVH_BuildQueue_Test.cxx (LGPL-2.1 with the OCCT exception)
 # C++ Fetch(bool& wasBusy) is in/out: the binding takes wasBusy and returns (item, wasBusy).
+# ConcurrentEnqueue, ConcurrentFetch, ConcurrentEnqueueAndFetch not translated: they test the queue's mutex under
+# std::thread contention. The bound Enqueue/Fetch/Size hold the GIL for the whole C++ call (no GIL release), so
+# Python threads would enter the queue one at a time and the cases would reduce to the sequential ones above.
 import pytest
 
 from nanocct.BVH import BVH_BuildQueue

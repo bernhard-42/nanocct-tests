@@ -295,6 +295,16 @@ def test_TCollection_ExtendedStringTest_LargeStrings():
     assert aLargeString.IsAscii() is True
 
 
+def test_TCollection_ExtendedStringTest_MemoryAllocation():
+    for anIdx in range(1, 17):
+        aTestString = TCollection_ExtendedString(anIdx, "X")
+        assert aTestString.Length() == anIdx
+        assert aTestString.Value(1) == "X"
+
+        if anIdx > 1:
+            assert aTestString.Value(anIdx) == "X"
+
+
 def test_TCollection_ExtendedStringTest_MultiByteCString():
     aString = TCollection_ExtendedString("Multi-byte test", True)
     assert aString.Length() > 0

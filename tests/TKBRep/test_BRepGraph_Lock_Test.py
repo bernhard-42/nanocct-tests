@@ -1,5 +1,7 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_Lock_Test.cxx (LGPL-2.1 with the OCCT exception)
 # LayerRegistry().Ensure<T>() / FindLayer<T>() are templates; they are written as FindLayer(T.GetID_s()) plus RegisterLayer(T()).
+# Not translated: ItemDispatchDelegatesToTypedCallbacks: its BRepGraph_LayerItemDispatchProbe derives from the abstract
+# BRepGraph_Layer, and nanocct binds no trampolines for Python subclasses of abstract OCCT classes (docs/Excluded.md).
 import pytest
 
 from nanocct.BRepGraph import (

@@ -1,4 +1,6 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/math_Vector_Test.cxx (LGPL-2.1 with the OCCT exception)
+# MoveSemantics not translated: C++ move construction/assignment (std::move) and the moved-from state have no Python
+# equivalent.
 import math
 
 import pytest

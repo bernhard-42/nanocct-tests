@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_RepId_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: Increment: the typed RepId's only increment is operator++ (prefix and postfix), which has no Python
+# equivalent (docs/Coverage.md).
 from nanocct.BRepGraphInc import (
     BRepGraph_CoEdgeCurve2DRepId,
     BRepGraph_CoEdgePolygon2DRepId,

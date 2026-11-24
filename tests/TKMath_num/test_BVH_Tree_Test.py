@@ -1,10 +1,13 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/BVH_Tree_Test.cxx (LGPL-2.1 with the OCCT exception)
 # Child<K>(node) is a C++ template (not bound); it reads NodeInfoBuffer()[node][K + 1], i.e. .y() / .z().
 # ChangeChild<0>(node) writes the same slot as BegPrimitive(node) -> SetBegPrimitive.
+# Tree4D not translated: BVH_Tree<double, 4> is not bound -- a class template is bound per instantiation a bound OCCT
+# signature uses, and none uses this one (only the explicit instantiation in BVH.cxx).
 from nanocct.BOPTools import BVH_Tree__double__2__BVH_BinaryTree as Tree2
 from nanocct.BVH import BVH_Tree__double__3__BVH_BinaryTree as Tree3
-from nanocct.BVH import BVH_Vec2d, BVH_Vec3d as V
+from nanocct.BVH import BVH_Vec2d, BVH_Vec3d as V, BVH_Vec3f
 from nanocct.Bnd import BVH_Box__double__3 as Box3
+from nanocct.OpenGl import BVH_Tree__float__3__BVH_BinaryTree as Tree3f
 
 TOL = 1e-7
 
@@ -131,6 +134,14 @@ def test_BVH_TreeTest_SinglePrimitive():
     assert t.NbPrimitives(0) == 1
     assert t.BegPrimitive(0) == 7
     assert t.EndPrimitive(0) == 7
+
+
+def test_BVH_TreeTest_Float3DTree():
+    t = Tree3f()
+    t.AddLeafNode(BVH_Vec3f(0.0, 0.0, 0.0), BVH_Vec3f(1.0, 1.0, 1.0), 0, 5)
+    assert t.Length() == 1
+    near(t.MinPoint(0).x(), 0.0, 1e-5)
+    near(t.MaxPoint(0).x(), 1.0, 1e-5)
 
 
 def test_BVH_TreeTest_Tree2D():

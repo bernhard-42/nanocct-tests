@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_ItemId_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: InvalidSourceKindProducesInvalidItem: it builds its NodeId from static_cast<Kind>(9), a value no
+# enumerator has; a bound enum holds only its enumerators (BRepGraph_NodeId.Kind(9) raises ValueError).
 from nanocct.BRepGraph import BRepGraph_ItemId, BRepGraph_NodeId, BRepGraph_RefId
 
 

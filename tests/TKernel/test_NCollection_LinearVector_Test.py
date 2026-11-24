@@ -3,6 +3,9 @@
 # Not translated: move semantics, STL algorithms, EmplaceAppend (not bound), Data() (not bound), and every test
 # with std::string, TCollection_AsciiString, MoveOnly or MultiArg elements (those instantiations are not bound).
 # ChangeValue/ChangeFirst/ChangeLast of a scalar element are not bound; writes go through v[i] / SetValue.
+# CopyAssignment is not translated: it tests C++ operator= on a vector that already holds an element; operator= is
+# not bound (nanocct docs/Binding-Rules.md), NCollection_LinearVector has no Assign() to call instead, and a copy
+# constructor makes a new vector, which is what CopyConstructor already tests.
 
 import pytest
 

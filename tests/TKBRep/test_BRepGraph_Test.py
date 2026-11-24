@@ -1,4 +1,8 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: FindOriginal_SingleHop_ReturnsSource, FindDerived_SingleHop_ContainsTarget,
+# ApplyModification_MultiStepChain_FindOriginalTracesBack, ApplyModification_HistoryDisabled_NoHistoryNoDerivedEdges and
+# ApplyModification_HistoryDisabled_ModifierStillRuns: they are driven by Editor().Gen().ApplyModification, a member
+# template that takes a C++ callable (a lambda modifier); it is not bound.
 import pytest
 
 from nanocct import TopoDS

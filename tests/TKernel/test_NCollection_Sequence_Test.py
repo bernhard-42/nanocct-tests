@@ -1,7 +1,7 @@
 # Translated from OCCT src/FoundationClasses/TKernel/GTests/NCollection_Sequence_Test.cxx (LGPL-2.1 with the OCCT exception)
-# Not translated: AllocatorTest, MoveOperations, STL algorithm tests, Emplace* (not bound, custom C++ element types).
+# Not translated: MoveOperations, STL algorithm tests, Emplace* (not bound, custom C++ element types).
 
-from nanocct.NCollection import NCollection_Sequence
+from nanocct.NCollection import NCollection_IncAllocator, NCollection_Sequence
 from nanocct.TCollection import TCollection_AsciiString
 
 SeqInt = NCollection_Sequence[int]
@@ -199,6 +199,27 @@ def test_NCollection_SequenceTest_ComplexTypeSequence():
     a_seq.Remove(1)
     assert a_seq.Size() == 2
     assert a_seq.First().ToCString() == "Modified"
+
+
+def test_NCollection_SequenceTest_AllocatorTest():
+    a_alloc = NCollection_IncAllocator()
+    a_seq = SeqInt(a_alloc)
+
+    a_seq.Append(10)
+    a_seq.Append(20)
+    a_seq.Append(30)
+
+    assert a_seq.Size() == 3
+    assert a_seq(1) == 10
+    assert a_seq(2) == 20
+    assert a_seq(3) == 30
+
+    a_alloc2 = NCollection_IncAllocator()
+    a_seq.Clear(a_alloc2)
+    assert a_seq.IsEmpty()
+
+    a_seq.Append(40)
+    assert a_seq(1) == 40
 
 
 def test_NCollection_SequenceTest_OCC26448_PrependEmptySequence():

@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraphInc_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: Storage_SetRemoved_TransitionsUpdateActiveCounts: BRepGraphInc_Storage::SetRemoved(typed id, bool) and
+# IsRemoved(typed id) are C++ member templates (not bound); the bound SetRemoved takes a BRepGraph_RepId only.
 
 import pytest
 

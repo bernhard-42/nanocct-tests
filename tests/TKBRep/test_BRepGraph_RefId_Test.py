@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_RefId_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: InvalidKind_IsRejected: it builds its RefId from static_cast<Kind>(7), a value no enumerator has; a
+# bound enum holds only its enumerators (BRepGraph_RefId.Kind(7) raises ValueError).
 from nanocct.BRepGraph import (
     BRepGraph,
     BRepGraph_ChildRefId,

@@ -1,4 +1,8 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_Compact_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: CacheMesh_DriverSurvivesCompact, CacheMesh_DriverSurvivesCompactWithDedup and
+# CacheMesh_CanCopyFreshEntriesThroughCompact: their StubMeshDriver derives from the abstract BRepGraph_CacheMesh::Driver,
+# and nanocct binds no trampolines for Python subclasses of abstract OCCT classes (docs/Excluded.md); BRepGraph_CacheMesh
+# itself is not bound either (a member of incomplete type, src/cpp/TKBRep/report.txt).
 from nanocct.Bnd import Bnd_Box
 from nanocct.BRep import BRep_Builder
 from nanocct.BRepAlgoAPI import BRepAlgoAPI_Cut

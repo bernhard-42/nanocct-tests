@@ -188,6 +188,10 @@ def test_PLibTest_HermiteInterpolate():
     assert abs(df(last) - 0.0) <= CONF
 
 
+# test_PLibTest_EdgeCases: not translatable -- it calls only PLib::EvalPolynomial, an array-by-first-element overload
+# omitted by decision (overrides.toml [skip] methods, docs/Excluded.md)
+
+
 def test_PLibTest_JacobiParameters():
     for shape, maxdeg, code in (
         (GeomAbs.GeomAbs_C0, 10, 1),

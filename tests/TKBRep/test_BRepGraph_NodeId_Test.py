@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_NodeId_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: InvalidKind_IsRejected: it builds its NodeId from static_cast<Kind>(9), a value no enumerator has; a
+# bound enum holds only its enumerators (BRepGraph_NodeId.Kind(9) raises ValueError).
 from nanocct.BRepGraph import (
     BRepGraph,
     BRepGraph_EdgeId,

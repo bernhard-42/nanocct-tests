@@ -1,4 +1,6 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/math_DoubleTab_Test.cxx (LGPL-2.1 with the OCCT exception)
+# ExternalArrayConstructor not translated: math_DoubleTab(void* theTab, ...) wraps a raw external buffer (a void
+# pointer, not bound).
 import pytest
 
 from nanocct.math import math_DoubleTab

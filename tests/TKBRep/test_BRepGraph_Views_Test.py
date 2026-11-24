@@ -1,4 +1,8 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_Views_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: CacheRegistry_EnsureRegistersAttachedService, CacheRegistry_CacheIter_RangeFor,
+# CacheRegistry_ClearAllClearsRepresentationButKeepsService, CacheRegistry_GraphClearClearsRepresentationButKeepsService
+# and CacheRegistry_UnregisterDetachesService: their TestCacheService derives from the abstract BRepGraph_Cache, and
+# nanocct binds no trampolines for Python subclasses of abstract OCCT classes (docs/Excluded.md).
 
 import pytest
 

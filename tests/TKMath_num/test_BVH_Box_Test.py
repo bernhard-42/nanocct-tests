@@ -1,6 +1,13 @@
 # Translated from OCCT src/FoundationClasses/TKMath/GTests/BVH_Box_Test.cxx (LGPL-2.1 with the OCCT exception)
-from nanocct.BVH import BVH_Vec2d, BVH_Vec3d
+# BVH_Box<double, 4> is bound as Graphic3d_BndBox4d (its OCCT typedef), BVH_Box<float, 3> as OpenGl.BVH_Box__float__3.
+# Not translated:
+# - Transform_* / Transformed_* (double and float): Transform/Transformed live in a partial specialisation of the dropped
+#   CRTP base BVH_BaseBox (R-TEMPLATE-BASE, docs/Excluded.md).
+# - Constexpr_Construction, Constexpr_SinglePoint, Constexpr_DefaultInvalid: compile-time constexpr/static_assert checks.
+from nanocct.BVH import BVH_Vec2d, BVH_Vec3d, BVH_Vec3f, BVH_Vec4d
 from nanocct.Bnd import BVH_Box__double__2 as Box2, BVH_Box__double__3 as Box3
+from nanocct.Graphic3d import Graphic3d_BndBox4d as Box4
+from nanocct.OpenGl import BVH_Box__float__3 as Box3f
 
 TOL = 1e-7  # Precision::Confusion()
 
@@ -100,6 +107,32 @@ def test_BVH_BoxTest_Box2D():
     near(box.CornerMax().x(), 1.0)
     near(box.CornerMax().y(), 1.0)
     near(box.Area(), 1.0)
+
+
+def test_BVH_BoxTest_Box4D():
+    box = Box4()
+    box.Add(BVH_Vec4d(0.0, 0.0, 0.0, 0.0))
+    box.Add(BVH_Vec4d(1.0, 2.0, 3.0, 4.0))
+    assert box.IsValid()
+    near(box.CornerMin().x(), 0.0)
+    near(box.CornerMin().y(), 0.0)
+    near(box.CornerMin().z(), 0.0)
+    near(box.CornerMin().w(), 0.0)
+    near(box.CornerMax().x(), 1.0)
+    near(box.CornerMax().y(), 2.0)
+    near(box.CornerMax().z(), 3.0)
+    near(box.CornerMax().w(), 4.0)
+
+
+def test_BVH_BoxTest_FloatPrecision():
+    box = Box3f()
+    box.Add(BVH_Vec3f(0.0, 0.0, 0.0))
+    box.Add(BVH_Vec3f(1.0, 2.0, 3.0))
+    assert box.IsValid()
+    near(box.CornerMin().x(), 0.0, 1e-5)
+    near(box.CornerMax().x(), 1.0, 1e-5)
+    near(box.CornerMax().y(), 2.0, 1e-5)
+    near(box.CornerMax().z(), 3.0, 1e-5)
 
 
 def test_BVH_BoxTest_SinglePointBox():
@@ -234,6 +267,14 @@ def test_BVH_BoxTest_IsOutContained():
     b2 = B((2, 2, 2), (3, 3, 3))
     assert not b1.IsOut(b2)
     assert not b2.IsOut(b1)
+
+
+def test_BVH_BoxTest_IsOutFloat():
+    b1 = Box3f(BVH_Vec3f(0.0, 0.0, 0.0), BVH_Vec3f(1.0, 1.0, 1.0))
+    b2 = Box3f(BVH_Vec3f(2.0, 2.0, 2.0), BVH_Vec3f(3.0, 3.0, 3.0))
+    b3 = Box3f(BVH_Vec3f(0.5, 0.5, 0.5), BVH_Vec3f(1.5, 1.5, 1.5))
+    assert b1.IsOut(b2)
+    assert not b1.IsOut(b3)
 
 
 def test_BVH_BoxTest_Box2DIsOut():
@@ -374,6 +415,13 @@ def test_BVH_BoxTest_CenterByAxisNegative():
     near(box.Center(0), 0.0)
     near(box.Center(1), 0.0)
     near(box.Center(2), 0.0)
+
+
+def test_BVH_BoxTest_CenterByAxis4D():
+    box = Box4(BVH_Vec4d(0.0, 0.0, 0.0, 0.0), BVH_Vec4d(4.0, 6.0, 8.0, 10.0))
+    near(box.Center(0), 2.0)
+    near(box.Center(1), 3.0)
+    near(box.Center(2), 4.0)
 
 
 def test_BVH_BoxTest_IsOutPoint_Inside():

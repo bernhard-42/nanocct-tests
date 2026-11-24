@@ -1,4 +1,6 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_Copy_Test.cxx (LGPL-2.1 with the OCCT exception)
+# Not translated: CopyBox_DoesNotCopyTransientCacheServices: its CopyTestCacheService derives from the abstract
+# BRepGraph_Cache, and nanocct binds no trampolines for Python subclasses of abstract OCCT classes (docs/Excluded.md).
 from nanocct.BRep import BRep_Builder
 from nanocct.BRepAlgoAPI import BRepAlgoAPI_Fuse
 from nanocct.BRepBuilderAPI import BRepBuilderAPI_Copy, BRepBuilderAPI_MakeEdge

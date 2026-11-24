@@ -1,5 +1,7 @@
 # Translated from OCCT src/ModelingData/TKBRep/GTests/BRepGraph_DeferredInvalidation_Test.cxx (LGPL-2.1 with the OCCT exception)
 # A C++ scope end (MutGuard temporaries, BRepGraph_DeferredScope) is a released Python reference (`del`, end of statement).
+# Not translated: DeferredMode_ParallelMutation_WithExternalSync: it mutates the graph from OSD_Parallel::For with a C++
+# lambda guarded by a std::mutex (C++ threading).
 import pytest
 
 from nanocct.BRepGraph import (

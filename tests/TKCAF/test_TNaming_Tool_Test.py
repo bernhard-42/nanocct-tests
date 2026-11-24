@@ -44,6 +44,13 @@ def test_TNaming_ToolTest_GetShape_Primitive(root):
     assert got.IsSame(box)
 
 
+def test_TNaming_ToolTest_GetShape_NullNamedShape(root):
+    # EXPECT_NO_THROW around a call guarded by a null check, as in C++; a null handle is None.
+    ns = None
+    if ns is not None:
+        TNaming_Tool.GetShape_s(ns)
+
+
 def test_TNaming_ToolTest_OriginalShape_Modification(root):
     box1, box2 = _box(10.0, 10.0, 10.0), _box(20.0, 20.0, 20.0)
     label = root.FindChild(1)
