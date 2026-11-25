@@ -28,8 +28,8 @@ PYTHON ?= 3.14
 
 BUILD123D_REPO   := https://github.com/gumyr/build123d.git
 # patches/build123d-nanocct.patch writes this commit's version, marked +nanocct, into src/build123d/_version.py
-# (0.13.1.dev441+nanocct): a new commit needs it updated there
-BUILD123D_COMMIT := 78e0a2f90de53d218386334013d551d163481ce5
+# (0.13.1.dev481+nanocct): a new commit needs it updated there
+BUILD123D_COMMIT := 0a3c9748ad6f58bbf2bcb859015bf59072f56b1c
 
 # Ports of build123d's dependencies that import OCP, patched to run on OCP or nanocct (nanocct wherever it is
 # installed): name-version|sha256|url of the PyPI sdist (PyPI's own digest,

@@ -47,7 +47,7 @@ index 8ab299f..361aa73 100644
  from build123d.topology import Shape
  
 diff --git a/pyproject.toml b/pyproject.toml
-index 16fbc52..c9b24bd 100644
+index 16fbc52..f08aa2e 100644
 --- a/pyproject.toml
 +++ b/pyproject.toml
 @@ -33,7 +33,7 @@ classifiers = [
@@ -78,7 +78,7 @@ index 16fbc52..c9b24bd 100644
  
 -[tool.setuptools_scm]
 -write_to = "src/build123d/_version.py"
-+# the nanocct port: build123d at 78e0a2f (setuptools_scm: 0.13.1.dev441), marked +nanocct
++# the nanocct port: build123d at 0a3c974 (setuptools_scm: 0.13.1.dev481), marked +nanocct
 +[tool.setuptools.dynamic]
 +version = { attr = "build123d._version.version" }
  
@@ -86,11 +86,11 @@ index 16fbc52..c9b24bd 100644
  target-version = ["py311", "py312", "py313", "py314"]
 diff --git a/src/build123d/_version.py b/src/build123d/_version.py
 new file mode 100644
-index 0000000..a5dcbc9
+index 0000000..87da51a
 --- /dev/null
 +++ b/src/build123d/_version.py
 @@ -0,0 +1 @@
-+version = __version__ = "0.13.1.dev441+nanocct"
++version = __version__ = "0.13.1.dev481+nanocct"
 diff --git a/src/build123d/build_common.py b/src/build123d/build_common.py
 index 28cb091..12e6bf7 100644
 --- a/src/build123d/build_common.py
@@ -118,12 +118,12 @@ index 14b111a..00d7cbd 100644
      GccEnt_enclosing,
      GccEnt_outside,
 diff --git a/src/build123d/exporters.py b/src/build123d/exporters.py
-index 3dc1f47..6f3fb11 100644
+index e5cf9d7..83a0248 100644
 --- a/src/build123d/exporters.py
 +++ b/src/build123d/exporters.py
-@@ -47,17 +47,17 @@ import svgpathtools as PT
- from ezdxf import zoom
- from ezdxf.colors import RGB, aci2rgb
+@@ -50,17 +50,17 @@ from ezdxf.filemanagement import new as new_dxf
+ from ezdxf.lldxf.const import DXF2004, DXF2013
+ from ezdxf.math import BSpline as DXFBSpline
  from ezdxf.math import Vec2
 -from OCP.BRepLib import BRepLib
 -from OCP.BRepTools import BRepTools_WireExplorer
@@ -288,7 +288,7 @@ index f842e33..9d7f2b9 100644
  
  
 diff --git a/src/build123d/geometry.py b/src/build123d/geometry.py
-index 73ff3ec..aebca98 100644
+index 346cd62..6f1283e 100644
 --- a/src/build123d/geometry.py
 +++ b/src/build123d/geometry.py
 @@ -57,15 +57,15 @@ from typing import (
@@ -334,7 +334,7 @@ index 73ff3ec..aebca98 100644
  
  from build123d.build_enums import Align, Align2D, Align3D, Extrinsic, Intrinsic
  
-@@ -781,7 +782,7 @@ class Axis(metaclass=AxisMeta):
+@@ -785,7 +786,7 @@ class Axis(metaclass=AxisMeta):
                  raise ValueError(f"Invalid edge argument: {edge}")
  
              topods_edge: TopoDS_Edge = edge.wrapped  # type: ignore[annotation-unchecked]
@@ -543,7 +543,7 @@ index a06e743..c57a59f 100644
  
  from build123d.build_common import (
 diff --git a/src/build123d/operations_sheet.py b/src/build123d/operations_sheet.py
-index ab58e4b..a849bf7 100644
+index ce9d308..849a26f 100644
 --- a/src/build123d/operations_sheet.py
 +++ b/src/build123d/operations_sheet.py
 @@ -35,9 +35,9 @@ from statistics import median
@@ -707,7 +707,7 @@ index a6ed3e5..d7e9188 100644
      def register_font(
          self, path: str, override: bool = False, single_stroke: bool = False
 diff --git a/src/build123d/topology/composite.py b/src/build123d/topology/composite.py
-index 4cb4112..4298bcc 100644
+index 00296cd..68de3b1 100644
 --- a/src/build123d/topology/composite.py
 +++ b/src/build123d/topology/composite.py
 @@ -63,11 +63,11 @@ from typing_extensions import Self, deprecated
@@ -751,10 +751,10 @@ index 4cb4112..4298bcc 100644
  from build123d.build_enums import Align, CenterOf, FontStyle, Select, TextAlign, Unit
  from build123d.geometry import (
 diff --git a/src/build123d/topology/constrained_lines.py b/src/build123d/topology/constrained_lines.py
-index ba08fff..f0eb7fb 100644
+index b28b214..24e2ed2 100644
 --- a/src/build123d/topology/constrained_lines.py
 +++ b/src/build123d/topology/constrained_lines.py
-@@ -33,13 +33,13 @@ from math import atan2, cos, isnan, sin, pi
+@@ -34,13 +34,13 @@ from collections.abc import Sequence
  from typing import overload, TYPE_CHECKING, Callable, TypeVar
  from typing import cast as tcast
  
@@ -775,7 +775,7 @@ index ba08fff..f0eb7fb 100644
      Geom2d_CartesianPoint,
      Geom2d_Circle,
      Geom2d_Curve,
-@@ -47,9 +47,9 @@ from OCP.Geom2d import (
+@@ -48,9 +48,9 @@ from OCP.Geom2d import (
      Geom2d_Point,
      Geom2d_TrimmedCurve,
  )
@@ -788,7 +788,7 @@ index ba08fff..f0eb7fb 100644
      Geom2dGcc_Circ2d2TanOn,
      Geom2dGcc_Circ2d2TanRad,
      Geom2dGcc_Circ2d3Tan,
-@@ -59,9 +59,9 @@ from OCP.Geom2dGcc import (
+@@ -60,9 +60,9 @@ from OCP.Geom2dGcc import (
      Geom2dGcc_Lin2d2Tan,
      Geom2dGcc_QualifiedCurve,
  )
@@ -801,20 +801,25 @@ index ba08fff..f0eb7fb 100644
      gp_Ax2d,
      gp_Ax3,
      gp_Circ2d,
-@@ -73,9 +73,9 @@ from OCP.gp import (
+@@ -74,14 +74,14 @@ from OCP.gp import (
      gp_Pnt2d,
      gp_Vec2d,
  )
 -from OCP.IntAna2d import IntAna2d_AnaIntersection
--from OCP.Standard import Standard_ConstructionError, Standard_Failure
--from OCP.TopoDS import TopoDS_Edge
+-from OCP.Standard import (
 +from nanocct.IntAna2d import IntAna2d_AnaIntersection
-+from nanocct.Standard import Standard_ConstructionError, Standard_Failure
++from nanocct.Standard import (
+     Standard_ConstructionError,
+     Standard_DomainError,
+     Standard_Failure,
+     Standard_OutOfRange,
+ )
+-from OCP.TopoDS import TopoDS_Edge
 +from nanocct.TopoDS import TopoDS_Edge
  
  from build123d.build_enums import Sagitta, Tangency
  from build123d.geometry import Axis, TOLERANCE, Vector, VectorLike
-@@ -124,7 +124,7 @@ def _edge_to_qualified_2d(
+@@ -140,7 +140,7 @@ def _edge_to_qualified_2d(
      """Convert a TopoDS_Edge into 2d curve & extract properties"""
  
      # 1) Underlying curve + range (also retrieve location to be safe)
@@ -957,7 +962,7 @@ index b5e7872..33edd0e 100644
      while not remaining.IsEmpty():
          found.append(remaining.First())
 diff --git a/src/build123d/topology/one_d.py b/src/build123d/topology/one_d.py
-index 7936133..c725c82 100644
+index a95d8b0..11461e6 100644
 --- a/src/build123d/topology/one_d.py
 +++ b/src/build123d/topology/one_d.py
 @@ -63,15 +63,15 @@ from typing import cast as tcast
@@ -982,7 +987,7 @@ index 7936133..c725c82 100644
      BRepBuilderAPI_DisconnectedWire,
      BRepBuilderAPI_EmptyWire,
      BRepBuilderAPI_MakeEdge,
-@@ -82,28 +82,28 @@ from OCP.BRepBuilderAPI import (
+@@ -82,29 +82,29 @@ from OCP.BRepBuilderAPI import (
      BRepBuilderAPI_NonManifoldWire,
      BRepBuilderAPI_Transform,
  )
@@ -994,7 +999,8 @@ index 7936133..c725c82 100644
 -from OCP.BRepOffset import BRepOffset_MakeOffset
 -from OCP.BRepOffsetAPI import BRepOffsetAPI_MakeOffset
 -from OCP.BRepProj import BRepProj_Projection
--from OCP.BRepTools import BRepTools, BRepTools_WireExplorer
+-from OCP.BRepTools import BRepTools, BRepTools_ReShape, BRepTools_WireExplorer
+-from OCP.ElCLib import ElCLib
 -from OCP.Extrema import Extrema_ExtPC
 -from OCP.GC import (
 +from nanocct.BRepExtrema import BRepExtrema_DistShapeShape, BRepExtrema_SupportType
@@ -1005,7 +1011,8 @@ index 7936133..c725c82 100644
 +from nanocct.BRepOffset import BRepOffset_MakeOffset
 +from nanocct.BRepOffsetAPI import BRepOffsetAPI_MakeOffset
 +from nanocct.BRepProj import BRepProj_Projection
-+from nanocct.BRepTools import BRepTools, BRepTools_WireExplorer
++from nanocct.BRepTools import BRepTools, BRepTools_ReShape, BRepTools_WireExplorer
++from nanocct.ElCLib import ElCLib
 +from nanocct.Extrema import Extrema_ExtPC
 +from nanocct.GC import (
      GC_MakeArcOfCircle,
@@ -1024,7 +1031,7 @@ index 7936133..c725c82 100644
      Geom_BezierCurve,
      Geom_BSplineCurve,
      Geom_ConicalSurface,
-@@ -113,13 +113,13 @@ from OCP.Geom import (
+@@ -114,13 +114,13 @@ from OCP.Geom import (
      Geom_Surface,
      Geom_TrimmedCurve,
  )
@@ -1041,7 +1048,7 @@ index 7936133..c725c82 100644
      GeomAbs_C0,
      GeomAbs_C1,
      GeomAbs_C2,
-@@ -130,22 +130,22 @@ from OCP.GeomAbs import (
+@@ -131,22 +131,22 @@ from OCP.GeomAbs import (
      GeomAbs_G2,
      GeomAbs_JoinType,
  )
@@ -1069,14 +1076,21 @@ index 7936133..c725c82 100644
      gp_Ax1,
      gp_Ax2,
      gp_Ax3,
-@@ -160,31 +160,26 @@ from OCP.gp import (
+@@ -162,34 +162,29 @@ from OCP.gp import (
      gp_Trsf,
      gp_Vec,
  )
 -from OCP.GProp import GProp_GProps
 -from OCP.HLRAlgo import HLRAlgo_Projector
 -from OCP.HLRBRep import HLRBRep_Algo, HLRBRep_HLRToShape
--from OCP.ShapeAnalysis import ShapeAnalysis_FreeBounds
+-from OCP.ShapeAnalysis import (
++from nanocct.GProp import GProp_GProps
++from nanocct.HLRAlgo import HLRAlgo_Projector
++from nanocct.HLRBRep import HLRBRep_Algo, HLRBRep_HLRToShape
++from nanocct.ShapeAnalysis import (
+     ShapeAnalysis_CanonicalRecognition,
+     ShapeAnalysis_FreeBounds,
+ )
 -from OCP.ShapeFix import ShapeFix_Shape, ShapeFix_Wireframe
 -from OCP.Standard import Standard_ConstructionError
 -from OCP.collections import (
@@ -1092,10 +1106,6 @@ index 7936133..c725c82 100644
 -    IndexedMap_TopoDS_Shape_TopTools_ShapeMapHasher,
 -    List_TopoDS_Shape,
 -    Map_TopoDS_Shape_TopTools_ShapeMapHasher,
-+from nanocct.GProp import GProp_GProps
-+from nanocct.HLRAlgo import HLRAlgo_Projector
-+from nanocct.HLRBRep import HLRBRep_Algo, HLRBRep_HLRToShape
-+from nanocct.ShapeAnalysis import ShapeAnalysis_FreeBounds
 +from nanocct.ShapeFix import ShapeFix_Shape, ShapeFix_Wireframe
 +from nanocct.Standard import Standard_ConstructionError
 +from nanocct.NCollection import (
@@ -1120,15 +1130,24 @@ index 7936133..c725c82 100644
      TopoDS_Compound,
      TopoDS_Edge,
      TopoDS_Face,
-@@ -192,6 +187,7 @@ from OCP.TopoDS import (
+@@ -197,6 +192,7 @@ from OCP.TopoDS import (
      TopoDS_Vertex,
      TopoDS_Wire,
  )
 +import nanocct.TopoDS as TopoDS
  from scipy.optimize import minimize_scalar
- from scipy.spatial import ConvexHull
+ from scipy.spatial import ConvexHull, cKDTree
  from typing_extensions import Self, deprecated
-@@ -1974,12 +1970,12 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -672,7 +668,7 @@ def _extended_to(
+     """``base`` extended along its own curve to take in ``extra``, if ``extra``
+     lies on that curve and the two touch or overlap. See :meth:`Edge.merge`"""
+     first, last = BRep_Tool.Range_s(base.wrapped)
+-    curve = BRep_Tool.Curve_s(base.wrapped, first, last)
++    curve = BRep_Tool.Curve_s(base.wrapped)[0]
+     if isinstance(curve, Geom_TrimmedCurve):
+         curve = curve.BasisCurve()
+ 
+@@ -2228,12 +2224,12 @@ class Edge(Mixin1D[TopoDS_Edge]):
          cntl_gp_pnts = [Vector(cntl_pnt).to_pnt() for cntl_pnt in cntl_pnts]
  
          # The poles are stored in an OCCT Array object
@@ -1143,7 +1162,7 @@ index 7936133..c725c82 100644
              for i, weight in enumerate(weights):
                  pole_weights.SetValue(i + 1, float(weight))
              bezier_curve = Geom_BezierCurve(poles, pole_weights)
-@@ -2741,7 +2737,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -2995,7 +2991,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
          point_vectors = [Vector(point) for point in points]
          if tangents:
              tangent_vectors = tuple(Vector(v) for v in tangents)
@@ -1152,7 +1171,7 @@ index 7936133..c725c82 100644
          for i, point in enumerate(point_vectors):
              pnts.SetValue(i + 1, point.to_pnt())
  
-@@ -2754,7 +2750,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3008,7 +3004,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
                      "(plus one if periodic), or none specified. Parameter count: "
                      f"{len(parameters)}, point count: {len(point_vectors)}"
                  )
@@ -1161,7 +1180,7 @@ index 7936133..c725c82 100644
              for p_index, p_value in enumerate(parameters):
                  parameters_array.SetValue(p_index + 1, p_value)
  
-@@ -2775,8 +2771,8 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3029,8 +3025,8 @@ class Edge(Mixin1D[TopoDS_Edge]):
                      )
  
                  # Specify a tangent for each interpolation point:
@@ -1172,7 +1191,7 @@ index 7936133..c725c82 100644
                  for t_index, t_value in enumerate(tangent_vectors):
                      tangent_enabled_array.SetValue(t_index + 1, t_value is not None)
                      tangent_vec = t_value if t_value is not None else Vector()
-@@ -2835,21 +2831,21 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3089,21 +3085,21 @@ class Edge(Mixin1D[TopoDS_Edge]):
                  unique_knots.append(knot)
                  multiplicities.append(1)
  
@@ -1198,7 +1217,7 @@ index 7936133..c725c82 100644
              for index, weight in enumerate(weights_list, start=1):
                  weights_array.SetValue(index, float(weight))
              spline_geom = Geom_BSplineCurve(
-@@ -2901,7 +2897,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3155,7 +3151,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
          Returns:
              Edge: spline
          """
@@ -1207,7 +1226,7 @@ index 7936133..c725c82 100644
          for i, point in enumerate(points):
              pnts.SetValue(i + 1, Vector(point).to_pnt())
  
-@@ -3053,19 +3049,9 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3307,19 +3303,9 @@ class Edge(Mixin1D[TopoDS_Edge]):
          pln_shape = BRepBuilderAPI_MakeFace(plane.wrapped).Face()
          edge_surface = BRep_Tool.Surface_s(pln_shape)
  
@@ -1229,7 +1248,7 @@ index 7936133..c725c82 100644
              intersector = Geom2dAPI_InterCurveCurve(
                  self_2d_curve, edge_2d_curve, tolerance
              )
-@@ -3441,7 +3427,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3837,7 +3823,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
          # end points.
  
          # Extract the normalized parameter using OCCT GeomAPI_ProjectPointOnCurve
@@ -1238,7 +1257,7 @@ index 7936133..c725c82 100644
          projector = GeomAPI_ProjectPointOnCurve(pnt.to_pnt(), curve)
          param = projector.LowerDistanceParameter()
          # Note that for some periodic curves the LowerDistanceParameter might
-@@ -3562,7 +3548,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -3958,7 +3944,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
  
          if reconstruct:
              first, last = BRep_Tool.Range_s(self._wrapped)
@@ -1247,7 +1266,7 @@ index 7936133..c725c82 100644
              first = curve.ReversedParameter(first)
              last = curve.ReversedParameter(last)
              topods_edge = BRepBuilderAPI_MakeEdge(curve.Reversed(), last, first).Edge()
-@@ -3600,11 +3586,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -4074,11 +4060,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
          # Rebuild the edge
          trimmed_edge = Edge(
              BRepBuilderAPI_MakeEdge(
@@ -1260,7 +1279,7 @@ index 7936133..c725c82 100644
                  *sorted([parm_start, parm_end]),
              ).Edge()
          )
-@@ -3639,7 +3621,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
+@@ -4113,7 +4095,7 @@ class Edge(Mixin1D[TopoDS_Edge]):
  
          start_u = Mixin1D._to_param(self, start, "start")
  
@@ -1269,16 +1288,29 @@ index 7936133..c725c82 100644
  
          # Create an adaptor for the curve
          adaptor_curve = GeomAdaptor_Curve(new_curve)
-@@ -3934,7 +3916,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
-             edges = placed_edges
+@@ -4430,7 +4412,11 @@ class Wire(Mixin1D[TopoDS_Wire]):
+         ]
+         points = [BRep_Tool.Pnt_s(vertex) for vertex in vertices]
+         tolerances = [BRep_Tool.Tolerance_s(vertex) for vertex in vertices]
+-        tree = cKDTree(np.reshape([point.Coord() for point in points], (-1, 3)))
++        tree = cKDTree(
++            np.reshape(
++                [point.Coord__float__float__float() for point in points], (-1, 3)
++            )
++        )
+         first = list(range(len(vertices)))
+         # pairs come as (i, j) with i < j; give each j its earliest match
+         for i, j in sorted(
+@@ -4455,7 +4441,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
+                 )
  
          wire_builder = BRepBuilderAPI_MakeWire()
 -        combined_edges = List_TopoDS_Shape()
 +        combined_edges = NCollection_List[TopoDS_Shape]()
          for edge in edges:
              if not edge.is_empty:
-                 combined_edges.Append(edge.wrapped)
-@@ -3970,14 +3952,13 @@ class Wire(Mixin1D[TopoDS_Wire]):
+                 combined_edges.Append(reshaper.Apply(edge.wrapped))
+@@ -4491,14 +4477,13 @@ class Wire(Mixin1D[TopoDS_Wire]):
              ShapeList[Wire]: Wires
          """
  
@@ -1295,7 +1327,7 @@ index 7936133..c725c82 100644
  
          wires = ShapeList()
          for i in range(wires_out.Length()):
-@@ -4277,7 +4258,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
+@@ -4805,7 +4790,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
          chamfer_builder = BRepFilletAPI_MakeFillet2d(unchamfered_face)
  
          vertex_edge_map = (
@@ -1304,7 +1336,7 @@ index 7936133..c725c82 100644
          )
          TopExp.MapShapesAndAncestors_s(
              unchamfered_face, ta.TopAbs_VERTEX, ta.TopAbs_EDGE, vertex_edge_map
-@@ -4336,7 +4317,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
+@@ -4864,7 +4849,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
          explorer = BRepTools_WireExplorer(self.wrapped)
  
          edge_list: ShapeList[Edge] = ShapeList()
@@ -1313,7 +1345,7 @@ index 7936133..c725c82 100644
          while explorer.More():
              explored_edge = explorer.Current()
              explored.Add(explored_edge)
-@@ -4588,11 +4569,11 @@ class Wire(Mixin1D[TopoDS_Wire]):
+@@ -5120,11 +5105,11 @@ class Wire(Mixin1D[TopoDS_Wire]):
              closest_topods_edge = tcast(
                  TopoDS_Edge, downcast(extrema.SupportOnShape2(1))
              )
@@ -1327,7 +1359,7 @@ index 7936133..c725c82 100644
              )
              TopExp.MapShapesAndAncestors_s(
                  self.wrapped, ta.TopAbs_VERTEX, ta.TopAbs_EDGE, vertex_edge_map
-@@ -4917,7 +4898,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
+@@ -5449,7 +5434,7 @@ class Wire(Mixin1D[TopoDS_Wire]):
                  wire_explorer.Next()
                  continue
              param_min, param_max = BRep_Tool.Range_s(topods_edge)
@@ -1336,7 +1368,7 @@ index 7936133..c725c82 100644
              trimmed_curve = Geom_TrimmedCurve(new_curve, param_min, param_max)
  
              # Append this edge's trimmed curve into the composite spline.
-@@ -5003,13 +4984,12 @@ def edges_to_wires(edges: Iterable[Edge], tol: float = 1e-6) -> ShapeList[Wire]:
+@@ -5535,13 +5520,12 @@ def edges_to_wires(edges: Iterable[Edge], tol: float = 1e-6) -> ShapeList[Wire]:
  
      """
  
@@ -1352,7 +1384,7 @@ index 7936133..c725c82 100644
  
      wires: ShapeList[Wire] = ShapeList()
      for i in range(wires_out.Length()):
-@@ -5143,8 +5123,8 @@ def _dihedral_convexity(
+@@ -5675,8 +5659,8 @@ def _dihedral_convexity(
      """
      curve = BRepAdaptor_Curve(edge)
      first, last = curve.FirstParameter(), curve.LastParameter()
@@ -1363,7 +1395,7 @@ index 7936133..c725c82 100644
      reversed_in_face2 = (
          _edge_as_bounded_by(face2, edge).Orientation()
          == TopAbs_Orientation.TopAbs_REVERSED
-@@ -5204,7 +5184,7 @@ def topo_explore_connected_faces(
+@@ -5736,7 +5720,7 @@ def topo_explore_connected_faces(
  
      # make a edge --> faces mapping
      edge_face_map = (
@@ -1372,7 +1404,7 @@ index 7936133..c725c82 100644
      )
      TopExp.MapShapesAndAncestors_s(
          parent.wrapped, ta.TopAbs_EDGE, ta.TopAbs_FACE, edge_face_map
-@@ -5221,7 +5201,7 @@ def topo_explore_connected_faces(
+@@ -5753,7 +5737,7 @@ def topo_explore_connected_faces(
      relocation = relocation_between(parent_edge, edge.wrapped)
  
      # Query the map and select only unique faces
@@ -1382,10 +1414,10 @@ index 7936133..c725c82 100644
          unique_face_map.Add(face)
      return [
 diff --git a/src/build123d/topology/shape_core.py b/src/build123d/topology/shape_core.py
-index 84a5d5c..a6a4e61 100644
+index 096fccf..e88b73c 100644
 --- a/src/build123d/topology/shape_core.py
 +++ b/src/build123d/topology/shape_core.py
-@@ -71,17 +71,17 @@ from typing import cast as tcast
+@@ -70,17 +70,17 @@ from typing import cast as tcast
  from typing import overload
  
  import numpy as np
@@ -1412,7 +1444,7 @@ index 84a5d5c..a6a4e61 100644
      BRepAlgoAPI_BooleanOperation,
      BRepAlgoAPI_Common,
      BRepAlgoAPI_Cut,
-@@ -89,7 +89,7 @@ from OCP.BRepAlgoAPI import (
+@@ -88,7 +88,7 @@ from OCP.BRepAlgoAPI import (
      BRepAlgoAPI_Section,
      BRepAlgoAPI_Splitter,
  )
@@ -1421,7 +1453,7 @@ index 84a5d5c..a6a4e61 100644
      BRepBuilderAPI_Copy,
      BRepBuilderAPI_GTransform,
      BRepBuilderAPI_MakeFace,
-@@ -100,28 +100,28 @@ from OCP.BRepBuilderAPI import (
+@@ -99,28 +99,28 @@ from OCP.BRepBuilderAPI import (
      BRepBuilderAPI_Transform,
      BRepBuilderAPI_Transformed,
  )
@@ -1472,7 +1504,7 @@ index 84a5d5c..a6a4e61 100644
      TopoDS_Builder,
      TopoDS_Compound,
      TopoDS_Edge,
-@@ -133,11 +133,9 @@ from OCP.TopoDS import (
+@@ -132,11 +132,9 @@ from OCP.TopoDS import (
      TopoDS_Vertex,
      TopoDS_Wire,
  )
@@ -1484,10 +1516,10 @@ index 84a5d5c..a6a4e61 100644
 +import nanocct.TopoDS as TopoDS
 +from nanocct.NCollection import NCollection_IndexedDataMap, NCollection_List
 +from nanocct.TopTools import TopTools_ShapeMapHasher
- from typing_extensions import Self, deprecated
+ from typing_extensions import Self, TypeVar, deprecated
  
  from bd_materials import FinishedMaterial, resolve as resolve_material
-@@ -623,7 +621,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -622,7 +620,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
  
              # Create an empty indexed data map to store the edges and their corresponding faces.
              shape_map = (
@@ -1496,7 +1528,7 @@ index 84a5d5c..a6a4e61 100644
              )
  
              # Fill the map with edges and their associated faces in the given shape. Each edge in
-@@ -2587,7 +2585,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -2586,7 +2584,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
                  "Several tools leave the pieces with no top or bottom; use keep=Keep.ALL"
              )
  
@@ -1505,7 +1537,7 @@ index 84a5d5c..a6a4e61 100644
          shape_list.Append(self.wrapped)
  
          # Define the splitting tool(s). A lone plane becomes an unbounded face,
-@@ -2609,7 +2607,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -2608,7 +2606,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
  
          tool = tools[0]
          trim_tool = planar_face(tool) if isinstance(tool, Plane) else tool.wrapped
@@ -1514,7 +1546,7 @@ index 84a5d5c..a6a4e61 100644
          for a_tool in tools:
              tool_list.Append(
                  planar_face(a_tool) if isinstance(a_tool, Plane) else a_tool.wrapped
-@@ -2756,30 +2754,17 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -2755,30 +2753,17 @@ class Shape(NodeMixin, Generic[TOPODS]):
              trsf = loc.Transformation()
              reverse = face.wrapped.Orientation() == TopAbs_Orientation.TopAbs_REVERSED
  
@@ -1556,7 +1588,7 @@ index 84a5d5c..a6a4e61 100644
  
              offset += poly.NbNodes()
  
-@@ -2868,21 +2853,16 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -2867,21 +2852,16 @@ class Shape(NodeMixin, Generic[TOPODS]):
              trans = np.array([tr.X(), tr.Y(), tr.Z()])
  
              # Vertices — bulk extract via MapNodeArray + numpy transform
@@ -1582,7 +1614,7 @@ index 84a5d5c..a6a4e61 100644
              rotated_normals = norm_coords @ rot.T * reverse_factor
              all_normals.extend(
                  Vector(row[0], row[1], row[2]) for row in rotated_normals
-@@ -2890,11 +2870,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -2889,11 +2869,7 @@ class Shape(NodeMixin, Generic[TOPODS]):
  
              # UV coordinates — bulk extract via MapUVNodeArray + numpy normalize
              if poly.HasUVNodes():
@@ -1595,7 +1627,7 @@ index 84a5d5c..a6a4e61 100644
  
                  uv_min = uv_raw.min(axis=0)
                  uv_max = uv_raw.max(axis=0)
-@@ -3230,12 +3206,12 @@ class Shape(NodeMixin, Generic[TOPODS]):
+@@ -3229,12 +3205,12 @@ class Shape(NodeMixin, Generic[TOPODS]):
          # The base of the operation
          base = args[0] if isinstance(args, (list, tuple)) else args
  
@@ -1610,7 +1642,7 @@ index 84a5d5c..a6a4e61 100644
          for obj in tools:
              if not obj.is_empty:
                  tool.Append(obj._wrapped)
-@@ -3667,7 +3643,7 @@ def topo_distance_to(
+@@ -3666,7 +3642,7 @@ def topo_distance_to(
      if peer_type == "Vertex":
          vertex_neighbors: dict[Shape, set[Shape]] = {peer: set() for peer in peers}
          vertex_edge_map = (
@@ -1619,7 +1651,7 @@ index 84a5d5c..a6a4e61 100644
          )
          TopExp.MapShapesAndAncestors_s(
              parent.wrapped,
-@@ -3696,7 +3672,7 @@ def topo_distance_to(
+@@ -3695,7 +3671,7 @@ def topo_distance_to(
                          vertex_neighbors[vertex_peer].add(neighbor)
      else:
          connector_peer_map = (
@@ -1628,7 +1660,7 @@ index 84a5d5c..a6a4e61 100644
          )
          TopExp.MapShapesAndAncestors_s(
              parent.wrapped,
-@@ -4931,11 +4907,11 @@ def _topods_bool_op(
+@@ -4930,11 +4906,11 @@ def _topods_bool_op(
      """
      args = list(args)
      tools = list(tools)
@@ -1643,7 +1675,7 @@ index 84a5d5c..a6a4e61 100644
          tool.Append(obj)
  
 diff --git a/src/build123d/topology/silhouette.py b/src/build123d/topology/silhouette.py
-index 91695f6..0ed1110 100644
+index 7156978..e49011a 100644
 --- a/src/build123d/topology/silhouette.py
 +++ b/src/build123d/topology/silhouette.py
 @@ -42,22 +42,29 @@ from dataclasses import dataclass
@@ -1692,7 +1724,7 @@ index 91695f6..0ed1110 100644
  
  from build123d.build_enums import GeomType
  from build123d.geometry import (
-@@ -436,7 +443,7 @@ def _project_profile_by_extrusion(
+@@ -437,7 +444,7 @@ def _project_profile_by_extrusion(
      max_dimension = find_max_dimension([profile, target])
      extrusion = _extrude_topods_shape(profile.wrapped, direction * max_dimension)
  
@@ -1701,7 +1733,7 @@ index 91695f6..0ed1110 100644
      arguments.Append(target.wrapped)
      tools.Append(extrusion)
      operation = BRepAlgoAPI_Common()
-@@ -644,7 +651,7 @@ def curve_shadow(edge: Edge, plane: Plane, direction: Vector) -> list[Edge]:
+@@ -650,7 +657,7 @@ def curve_shadow(edge: Edge, plane: Plane, direction: Vector) -> list[Edge]:
              frame.from_local_coords(Vector(extent.max.X, 0, 0)),
          )
      first, last = BRep_Tool.Range_s(edge.wrapped)
@@ -1711,7 +1743,7 @@ index 91695f6..0ed1110 100644
          gp_Ax3(gp_Pnt(*plane.origin), gp_Dir(*plane.z_dir), gp_Dir(*plane.x_dir))
      )
 diff --git a/src/build123d/topology/three_d.py b/src/build123d/topology/three_d.py
-index 30cd002..74520d5 100644
+index aa07f22..3db67c1 100644
 --- a/src/build123d/topology/three_d.py
 +++ b/src/build123d/topology/three_d.py
 @@ -64,22 +64,22 @@ from typing_extensions import Self, deprecated
@@ -1816,7 +1848,7 @@ index 30cd002..74520d5 100644
          for face in openings:
              occ_faces_list.Append(face.wrapped)
  
-@@ -1562,7 +1560,7 @@ class Solid(Mixin3D[TopoDS_Solid]):
+@@ -1572,7 +1570,7 @@ class Solid(Mixin3D[TopoDS_Solid]):
          #    edge closes the step. Every edge owned by one such face is such an
          #    edge, a seam excepted
          edge_face_map = (
@@ -1826,7 +1858,7 @@ index 30cd002..74520d5 100644
          TopExp.MapShapesAndAncestors_s(
              _make_topods_compound_from_shapes([f.wrapped for f in facing]),
 diff --git a/src/build123d/topology/two_d.py b/src/build123d/topology/two_d.py
-index 66fd098..9b0dd5d 100644
+index c9cc144..1556eca 100644
 --- a/src/build123d/topology/two_d.py
 +++ b/src/build123d/topology/two_d.py
 @@ -63,24 +63,24 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
@@ -1960,7 +1992,7 @@ index 66fd098..9b0dd5d 100644
          seams = [seam for face in self.faces() for seam in face.seams]
          for perimeter_edge in perimeter.edges():
              if not perimeter_edge:
-@@ -1510,13 +1507,13 @@ class Face(Mixin2D[TopoDS_Face]):
+@@ -1520,13 +1517,13 @@ class Face(Mixin2D[TopoDS_Face]):
          ):
              raise ValueError("A weight must be provided for each control point")
  
@@ -1976,7 +2008,7 @@ index 66fd098..9b0dd5d 100644
              for i, row_weights in enumerate(weights):
                  for j, weight in enumerate(row_weights):
                      weights_.SetValue(i + 1, j + 1, float(weight))
-@@ -1560,15 +1557,15 @@ class Face(Mixin2D[TopoDS_Face]):
+@@ -1570,15 +1567,15 @@ class Face(Mixin2D[TopoDS_Face]):
          def create_zero_length_bspline_curve(
              point: gp_Pnt, degree: int = 1
          ) -> Geom_BSplineCurve:
@@ -1995,7 +2027,7 @@ index 66fd098..9b0dd5d 100644
              multiplicities.SetValue(1, degree + 1)
              multiplicities.SetValue(2, degree + 1)
  
-@@ -1587,7 +1584,7 @@ class Face(Mixin2D[TopoDS_Face]):
+@@ -1597,7 +1594,7 @@ class Face(Mixin2D[TopoDS_Face]):
                  raise ValueError("input Edge cannot be empty")
  
              adaptor = BRepAdaptor_Curve(shape.wrapped)
@@ -2004,7 +2036,7 @@ index 66fd098..9b0dd5d 100644
              if not (
                  (adaptor.IsPeriodic() and adaptor.IsClosed())
                  or adaptor.GetType() == GeomAbs_CurveType.GeomAbs_BSplineCurve
-@@ -1811,7 +1808,7 @@ class Face(Mixin2D[TopoDS_Face]):
+@@ -1821,7 +1818,7 @@ class Face(Mixin2D[TopoDS_Face]):
          Returns:
              Face: a potentially non-planar face defined by points
          """
@@ -2205,11 +2237,11 @@ index ec1ee16..a132a42 100644
          TopExp.MapShapesAndAncestors_s(
              parent.wrapped, ta.TopAbs_VERTEX, ta.TopAbs_EDGE, vertex_edge_map
 diff --git a/tests/test_build_sheet.py b/tests/test_build_sheet.py
-index b986f2b..fbb9443 100644
+index abca881..8787762 100644
 --- a/tests/test_build_sheet.py
 +++ b/tests/test_build_sheet.py
 @@ -6,8 +6,8 @@ import unittest
- from math import asin, cos, degrees, pi, radians, sin, sqrt, tan
+ from math import asin, copysign, cos, degrees, pi, radians, sin, sqrt, tan
  from unittest.mock import PropertyMock, patch
  
 -from OCP.BRepGProp import BRepGProp
@@ -2220,7 +2252,7 @@ index b986f2b..fbb9443 100644
  from build123d import *
  from build123d.geometry import TOLERANCE
 diff --git a/tests/test_build_sketch.py b/tests/test_build_sketch.py
-index a64f8b6..4fc321e 100644
+index dbfec1a..348d138 100644
 --- a/tests/test_build_sketch.py
 +++ b/tests/test_build_sketch.py
 @@ -32,7 +32,7 @@ import unittest
@@ -2292,11 +2324,11 @@ index 2189d68..df3802d 100644
  from build123d.geometry import Color
  
 diff --git a/tests/test_direct_api/test_constrained_arcs.py b/tests/test_direct_api/test_constrained_arcs.py
-index 621aa1e..230e618 100644
+index 28cdf8b..af47be0 100644
 --- a/tests/test_direct_api/test_constrained_arcs.py
 +++ b/tests/test_direct_api/test_constrained_arcs.py
-@@ -29,8 +29,8 @@ license:
- import platform
+@@ -30,8 +30,8 @@ import platform
+ from itertools import permutations
  
  import pytest
 -from OCP.BRep import BRep_Tool
@@ -2306,7 +2338,7 @@ index 621aa1e..230e618 100644
  
  from build123d.build_enums import GeomType, LengthMode, Sagitta, Tangency
  from build123d.build_line import BuildLine
-@@ -125,7 +125,7 @@ def test_tan2_rad_arcs_1():
+@@ -126,7 +126,7 @@ def test_tan2_rad_arcs_1():
      )
      assert len(tan2_rad_edges) == 4
  
@@ -2315,7 +2347,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_rad_arcs_2():
-@@ -135,7 +135,7 @@ def test_tan2_rad_arcs_2():
+@@ -136,7 +136,7 @@ def test_tan2_rad_arcs_2():
  
      tan2_rad_edges = Edge.make_constrained_arcs(e1, e2, radius=0.5)
      assert len(tan2_rad_edges) == 1
@@ -2324,7 +2356,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_rad_arcs_3():
-@@ -153,7 +153,7 @@ def test_tan2_rad_arcs_3():
+@@ -154,7 +154,7 @@ def test_tan2_rad_arcs_3():
      )
      assert len(tan2_rad_edges) == 2
  
@@ -2333,7 +2365,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_rad_arcs_4():
-@@ -163,7 +163,7 @@ def test_tan2_rad_arcs_4():
+@@ -164,7 +164,7 @@ def test_tan2_rad_arcs_4():
      tan2_rad_edges = Edge.make_constrained_arcs((0, 0.5), e1, radius=0.5)
      assert len(tan2_rad_edges) == 1
  
@@ -2342,7 +2374,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_rad_arcs_5():
-@@ -184,7 +184,7 @@ def test_tan2_center_on_1():
+@@ -185,7 +185,7 @@ def test_tan2_center_on_1():
          center_on=c3_center_on,
      )
      assert len(tan2_on_edge) == 1
@@ -2351,7 +2383,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_center_on_2():
-@@ -193,7 +193,7 @@ def test_tan2_center_on_2():
+@@ -194,7 +194,7 @@ def test_tan2_center_on_2():
          (0, 3), (5, 0), center_on=Line((0, -5), (0, 5))
      )
      assert len(tan2_on_edge) == 1
@@ -2360,7 +2392,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_center_on_3():
-@@ -202,7 +202,7 @@ def test_tan2_center_on_3():
+@@ -203,7 +203,7 @@ def test_tan2_center_on_3():
          Line((-5, 3), (5, 3)), (5, 0), center_on=Line((0, -5), (0, 5))
      )
      assert len(tan2_on_edge) == 1
@@ -2369,7 +2401,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_center_on_4():
-@@ -211,7 +211,7 @@ def test_tan2_center_on_4():
+@@ -212,7 +212,7 @@ def test_tan2_center_on_4():
          Line((-5, 3), (5, 3)), (5, 0), center_on=Axis.Y
      )
      assert len(tan2_on_edge) == 1
@@ -2378,7 +2410,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_center_on_5():
-@@ -262,7 +262,7 @@ def test_tan2_center_on_sagitta_both_returns_two_arcs():
+@@ -263,7 +263,7 @@ def test_tan2_center_on_sagitta_both_returns_two_arcs():
      assert len(arcs) >= 2  # be permissive across kernels; typically 4
      # At least confirms BOTH path is covered and multiple solutions iterate
  
@@ -2387,7 +2419,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan2_center_on_sagitta_long_is_longer_than_short():
-@@ -289,7 +289,7 @@ def test_tan2_center_on_sagitta_long_is_longer_than_short():
+@@ -290,7 +290,7 @@ def test_tan2_center_on_sagitta_long_is_longer_than_short():
      assert len(long_arc) == 2
      assert long_arc[0].length > short_arc[0].length
      assert all(
@@ -2396,7 +2428,7 @@ index 621aa1e..230e618 100644
      )
  
  
-@@ -367,7 +367,7 @@ def test_tan2_center_on_multiple_solutions_both_counts():
+@@ -368,7 +368,7 @@ def test_tan2_center_on_multiple_solutions_both_counts():
      # Expect at least 2 arcs (often 4); asserts loop over multiple i values
      assert len(arcs) >= 2
  
@@ -2405,7 +2437,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_center_on_1():
-@@ -376,7 +376,7 @@ def test_tan_center_on_1():
+@@ -377,7 +377,7 @@ def test_tan_center_on_1():
      tan_center = Edge.make_constrained_arcs((c5, Tangency.UNQUALIFIED), center=(2, 1))
      assert len(tan_center) == 1
      assert tan_center[0].is_closed
@@ -2414,7 +2446,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_center_on_2():
-@@ -384,7 +384,7 @@ def test_tan_center_on_2():
+@@ -385,7 +385,7 @@ def test_tan_center_on_2():
      tan_center = Edge.make_constrained_arcs(Axis.X, center=(2, 1, 5))
      assert len(tan_center) == 1
      assert tan_center[0].is_closed
@@ -2423,7 +2455,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_center_on_3():
-@@ -393,7 +393,7 @@ def test_tan_center_on_3():
+@@ -394,7 +394,7 @@ def test_tan_center_on_3():
      tan_center = Edge.make_constrained_arcs(l1, center=(2, 0))
      assert len(tan_center) == 1
      assert tan_center[0].is_closed
@@ -2432,7 +2464,7 @@ index 621aa1e..230e618 100644
  
  
  def test_pnt_center_1():
-@@ -401,12 +401,12 @@ def test_pnt_center_1():
+@@ -402,12 +402,12 @@ def test_pnt_center_1():
      pnt_center = Edge.make_constrained_arcs((-2.5, 1.5), center=(-2, 1))
      assert len(pnt_center) == 1
      assert pnt_center[0].is_closed
@@ -2447,7 +2479,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_cen_arcs_center_equals_point_returns_empty():
-@@ -433,7 +433,7 @@ def test_tan_rad_center_on_1():
+@@ -434,7 +434,7 @@ def test_tan_rad_center_on_1():
      )
      assert len(tan_rad_on) == 1
      assert tan_rad_on[0].is_closed
@@ -2456,7 +2488,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_rad_center_on_2():
-@@ -442,7 +442,7 @@ def test_tan_rad_center_on_2():
+@@ -443,7 +443,7 @@ def test_tan_rad_center_on_2():
      tan_rad_on = Edge.make_constrained_arcs(c1, radius=1, center_on=Axis.X)
      assert len(tan_rad_on) == 1
      assert tan_rad_on[0].is_closed
@@ -2465,7 +2497,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan_rad_center_on_3():
-@@ -474,7 +474,7 @@ def test_tan3_1():
+@@ -475,7 +475,7 @@ def test_tan3_1():
  
      tan3b = Edge.make_constrained_arcs(c5, c6, c7, sagitta=Sagitta.BOTH)
      assert len(tan3b) == 2
@@ -2474,7 +2506,7 @@ index 621aa1e..230e618 100644
  
  
  def test_tan3_2():
-@@ -627,7 +627,7 @@ def test_eggplant():
+@@ -762,7 +762,7 @@ def test_eggplant():
          for i in range(4)
      )
      assert all(
@@ -2607,15 +2639,15 @@ index bd73f4e..e191f7b 100644
  
  def test_make_constrained_lines_raises(unit_circle):
 diff --git a/tests/test_direct_api/test_edge.py b/tests/test_direct_api/test_edge.py
-index a1bda21..3bf5d62 100644
+index 605de7a..2cb6cdc 100644
 --- a/tests/test_direct_api/test_edge.py
 +++ b/tests/test_direct_api/test_edge.py
 @@ -49,7 +49,7 @@ from build123d.operations_generic import sweep
  from build123d.operations_generic import fillet
  from build123d.operations_part import extrude
  from build123d.topology import Curve, Edge, Face, Shell, Wire, Vertex
--from OCP.BRepBuilderAPI import BRepBuilderAPI_Sewing
-+from nanocct.BRepBuilderAPI import BRepBuilderAPI_Sewing
+-from OCP.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert, BRepBuilderAPI_Sewing
++from nanocct.BRepBuilderAPI import BRepBuilderAPI_NurbsConvert, BRepBuilderAPI_Sewing
  
  
  class TestEdge(unittest.TestCase):
@@ -2635,7 +2667,7 @@ index d811ad2..8c89b37 100644
  from build123d.build_enums import Keep, Mode
  from build123d.build_line import BuildLine
 diff --git a/tests/test_direct_api/test_face.py b/tests/test_direct_api/test_face.py
-index 3d1614f..503f8f5 100644
+index 62ae48f..d16adcb 100644
 --- a/tests/test_direct_api/test_face.py
 +++ b/tests/test_direct_api/test_face.py
 @@ -32,12 +32,12 @@ import random
@@ -2925,7 +2957,7 @@ index 5867f68..12f7675 100644
  from build123d.build_enums import CenterOf, GeomType, Kind
  from build123d.build_part import BuildPart
 diff --git a/tests/test_direct_api/test_plane.py b/tests/test_direct_api/test_plane.py
-index 30c9b88..f23e348 100644
+index 3c2733e..5c0f9d7 100644
 --- a/tests/test_direct_api/test_plane.py
 +++ b/tests/test_direct_api/test_plane.py
 @@ -33,11 +33,11 @@ import random
@@ -2945,7 +2977,7 @@ index 30c9b88..f23e348 100644
  from build123d.build_enums import Align, Extrinsic, GeomType, Intrinsic, Mode
  from build123d.build_part import BuildPart
 diff --git a/tests/test_direct_api/test_shape.py b/tests/test_direct_api/test_shape.py
-index 276773c..6c82e12 100644
+index 066b499..e980d76 100644
 --- a/tests/test_direct_api/test_shape.py
 +++ b/tests/test_direct_api/test_shape.py
 @@ -34,7 +34,7 @@ from random import uniform
@@ -3034,7 +3066,7 @@ index 5e302f2..3727774 100644
  from build123d.topology import Solid, Vertex
  
 diff --git a/tests/test_direct_api/test_wire.py b/tests/test_direct_api/test_wire.py
-index e0a735f..49ea84f 100644
+index fa8d9a9..7b3fcf8 100644
 --- a/tests/test_direct_api/test_wire.py
 +++ b/tests/test_direct_api/test_wire.py
 @@ -46,13 +46,13 @@ from build123d.operations_generic import fillet
