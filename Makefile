@@ -39,6 +39,9 @@ PORTS := \
     ocp_gordon-0.3.1|e55e695fd421e4dc10fe91636e7f2fa376ad81572faaf74e7bbed4b78c7918b7|https://files.pythonhosted.org/packages/35/b2/66ed6601660648ad5bf84a571460cd57e9db4b28c6833c55e229211a418d/ocp_gordon-0.3.1.tar.gz
 PORT_NAMES := $(foreach p,$(PORTS),$(firstword $(subst |, ,$(p))))
 PORT_INSTALL := $(foreach n,$(PORT_NAMES),"sources/ports/$(n)")
+# The sdists' checksum tool: sha256sum (GNU coreutils on Linux and in Git for Windows, /sbin/sha256sum on recent
+# macOS), else Perl's shasum (older macOS). Both read "<sha256>  <file>" lines with -c.
+SHA256SUM := $(if $(shell command -v sha256sum 2>/dev/null),sha256sum,shasum -a 256)
 
 # The packages that run on OCP or nanocct, whichever is installed. bd_materials does so since its release 0.2.5, which
 # comes from PyPI (DUAL_PYPI). The viewer's core (ocp_tessellate, ocp_viewer_core with its [cli] extra: ocp_vscode then
@@ -84,7 +87,7 @@ define ports
 	    IFS='|' read -r pkg sha url <<< "$$entry"; \
 	    tarball="sources/sdist/$$pkg.tar.gz"; \
 	    if [ ! -f "$$tarball" ]; then curl -fsSL -o "$$tarball.part" "$$url" && mv "$$tarball.part" "$$tarball"; fi; \
-	    echo "$$sha  $$tarball" | shasum -a 256 -c --quiet -; \
+	    echo "$$sha  $$tarball" | $(SHA256SUM) -c --quiet -; \
 	    rm -rf "sources/ports/$${pkg:?}"; \
 	    tar -xzf "$$tarball" -C sources/ports; \
 	    patch -p1 --forward --quiet -d "sources/ports/$$pkg" < "patches/$$pkg.patch"; \
