@@ -80,15 +80,16 @@ sources/build123d/.patched: patches/build123d-nanocct.patch
 	$(call checkout,sources/build123d,$(BUILD123D_REPO),$(BUILD123D_COMMIT),patches/build123d-nanocct.patch)
 
 # $(1) ports (name-version|sha256|url): each sdist is downloaded once into sources/sdist and verified; its tree in
-# sources/ports is unpacked and patched anew with patches/<name-version>.patch. A checksum mismatch ends the recipe
-# explicitly: GNU Make 3.81 (Xcode's make) ignores .SHELLFLAGS, so its recipes run without -e.
+# sources/ports is unpacked and patched anew with patches/<name-version>.patch. The loop sets -e itself: GNU Make 3.81
+# (Xcode's make, also on the macOS runners) ignores .SHELLFLAGS, and without -e a failing step of any port but the last
+# (a checksum mismatch, tar, patch) would not end the recipe.
 define ports
 	mkdir -p sources/sdist sources/ports
-	for entry in $(foreach p,$(1),'$(p)'); do \
+	set -e; for entry in $(foreach p,$(1),'$(p)'); do \
 	    IFS='|' read -r pkg sha url <<< "$$entry"; \
 	    tarball="sources/sdist/$$pkg.tar.gz"; \
 	    if [ ! -f "$$tarball" ]; then curl -fsSL -o "$$tarball.part" "$$url" && mv "$$tarball.part" "$$tarball"; fi; \
-	    echo "$$sha  $$tarball" | $(SHA256SUM) -c --quiet - || exit 1; \
+	    echo "$$sha  $$tarball" | $(SHA256SUM) -c --quiet -; \
 	    rm -rf "sources/ports/$${pkg:?}"; \
 	    tar -xzf "$$tarball" -C sources/ports; \
 	    patch -p1 --forward --quiet -d "sources/ports/$$pkg" < "patches/$$pkg.patch"; \

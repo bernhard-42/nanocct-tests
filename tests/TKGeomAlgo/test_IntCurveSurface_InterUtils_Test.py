@@ -1,11 +1,15 @@
 # Translated from OCCT src/ModelingAlgorithms/TKGeomAlgo/GTests/IntCurveSurface_InterUtils_Test.cxx (LGPL-2.1 with the OCCT exception)
-# Not translated: SectionPointToParameters_DegenerateFaceFallsBackToLongestEdge,
-# SortingPreservesDistinctParameterTriples, TransitionIsIndependentOfParameterScale, TransitionPreservesAngularTangency,
-# SortingPreservesEqualComponentsAndDuplicates, SortingPreservesLargeSeedSets,
-# TransitionHandlesExtremeAndZeroDerivatives, TransitionHandlesObliqueAndNearlyParallelDerivatives,
-# TransitionPreservesObliqueAngularTangencyAcrossScales: they call the function templates of
-# IntCurveSurface_InterUtils.pxx, a private header that OCCT does not install, instantiated on the test's own C++
-# tool classes, std::array and generic lambdas.
+# Not translated: the cases that call IntCurveSurface_InterUtils.pxx, a private header that OCCT does not install and
+# that no installed header includes, so nothing of it is bound:
+# - SortingPreservesDistinctParameterTriples, SortingPreservesEqualComponentsAndDuplicates,
+#   SortingPreservesLargeSeedSets: its inline function SortStartPoints;
+# - SectionPointToParameters_DegenerateFaceFallsBackToLongestEdge: its function template SectionPointToParameters, on
+#   the test's own polyhedron and polygon classes;
+# - TransitionIsIndependentOfParameterScale, TransitionPreservesAngularTangency: its function template
+#   ComputeTransitions, on OCCT's curve and surface tools;
+# - TransitionHandlesExtremeAndZeroDerivatives, TransitionHandlesObliqueAndNearlyParallelDerivatives,
+#   TransitionPreservesObliqueAngularTangencyAcrossScales: ComputeTransitions on std::array<gp_Vec, 3> with the test's
+#   own tool class.
 from nanocct.Geom import Geom_BSplineCurve, Geom_Plane
 from nanocct.GeomAdaptor import GeomAdaptor_Curve, GeomAdaptor_Surface
 from nanocct.gp import gp_Dir, gp_Pln, gp_Pnt
